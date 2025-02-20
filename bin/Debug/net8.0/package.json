@@ -1,6 +1,0 @@
-{
-    "scripts": {
-        "start": "dapr run --app-id myapp --dapr-http-port 3500 --components-path ./components/local -- dotnet run",
-        "start:stage": "dapr run --app-id myapp --dapr-http-port 3500 --components-path ./components/stage -- dotnet run"
-    }
-}
