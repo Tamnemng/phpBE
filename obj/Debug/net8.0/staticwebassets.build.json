@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "Hash": "3RTQgaLGIeQKu3IcaENuSI+H1nb0OJU78ZQMn4A6/Rc=",
+  "Source": "Think4",
+  "BasePath": "_content/Think4",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "Think4\\wwwroot",
+      "Source": "Think4",
+      "ContentRoot": "C:\\Users\\nguyn\\Downloads\\Think4\\wwwroot\\",
+      "BasePath": "_content/Think4",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": []
+}

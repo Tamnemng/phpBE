@@ -1,0 +1,6 @@
+@Think4_HostAddress = http://localhost:5194
+
+GET {{Think4_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

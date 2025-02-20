@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Think4.props" />
+</Project>
