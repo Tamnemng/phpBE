@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using OMS.Core.Queries;
 
 [ApiController]
 [Route("[controller]")]
@@ -12,6 +13,14 @@ public class RedisController : ControllerBase
     {
         _mediator = mediator;
     }
+
+    [HttpGet("get")]
+    public async Task<IActionResult> GetAllValues([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    {
+        var values = await _mediator.Send(new GetAllValuesQuery(pageIndex, pageSize));
+        return Ok(values);
+    }
+
 
     [HttpPost("set")]
     public async Task<IActionResult> SetValue([FromBody] KeyValuePair<string, string> data)
@@ -28,6 +37,21 @@ public class RedisController : ControllerBase
             return NotFound();
         return Ok(value);
     }
+
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateValue([FromBody] KeyValuePair<string, string> data)
+    {
+        try
+        {
+            await _mediator.Send(new UpdateValueCommand(data.Key, data.Value));
+            return Ok("Cập nhật thành công.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
 
     [HttpDelete("delete/{key}")]
     public async Task<IActionResult> DeleteValue(string key)
