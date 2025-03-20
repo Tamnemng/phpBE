@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PHPBE.Models;
 
 [ApiController]
 [Route("api/laptops")]
@@ -19,5 +18,4 @@ public class LaptopController : ControllerBase
         var value = await _mediator.Send(new GetLaptopByIdQuery(id));
         return Ok(value);
     }
-
 }
