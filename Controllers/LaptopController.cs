@@ -21,6 +21,13 @@ public class LaptopController : ControllerBase
         return Ok(value);
     }
 
+    [HttpGet("get")]
+    public async Task<IActionResult> GetAllLaptops([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    {
+        var values = await _mediator.Send(new GetAllLaptopQuery(pageIndex, pageSize));
+        return Ok(values);
+    }
+
     [HttpPost("add")]
     public async Task<IActionResult> AddLaptop([FromBody] AddLaptopCommand command)
     {
@@ -36,23 +43,10 @@ public class LaptopController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateLaptop([FromBody] KeyValuePair<string, string> data)
+    public async Task<IActionResult> UpdateLaptop([FromBody] UpdateLaptopCommand command)
     {
-        try
-        {
-            await _mediator.Send(new UpdateLaptopCommand(data.Key, data.Value));
-            return Ok("Cập nhật thành công.");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        await _mediator.Send(command);
+        return Ok("Cập nhật thành công.");
     }
 
-    [HttpGet("get")]
-    public async Task<IActionResult> GetAllLaptops([FromBody] int pageIndex = 0, [FromBody] int pageSize = 10)
-    {
-        var values = await _mediator.Send(new GetAllLaptopQuery(pageIndex, pageSize));
-        return Ok(values);
-    }
 }
