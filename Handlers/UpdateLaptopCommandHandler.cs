@@ -28,14 +28,7 @@ public class UpdateLaptopCommandHandler : IRequestHandler<UpdateLaptopCommand, U
         {
             { "Id", request.Id },
             { "Name", request.Name },
-            { "Brand", request.Brand },
-            { "CPU", request.CPU },
-            { "RAM", request.RAM },
-            { "GPU", request.GPU },
-            { "Storage", request.Storage },
-            { "ScreenSize", request.ScreenSize },
-            { "Price", request.Price },
-            { "Usage", request.Usage }
+            { "Labels", request.Labels },
         };
 
         await _daprClient.SaveStateAsync(STORE_NAME, request.Id, updatedLaptop, cancellationToken: cancellationToken);
