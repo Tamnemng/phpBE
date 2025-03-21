@@ -5,23 +5,23 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class UpdateLaptopCommandHandler : IRequestHandler<UpdateLaptopCommand, Unit>
+public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Unit>
 {
     private readonly DaprClient _daprClient;
     private const string STORE_NAME = "statestore";
 
-    public UpdateLaptopCommandHandler(DaprClient daprClient)
+    public UpdateProductCommandHandler(DaprClient daprClient)
     {
         _daprClient = daprClient;
     }
 
-    public async Task<Unit> Handle(UpdateLaptopCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         var existingLaptop = await _daprClient.GetStateAsync<Dictionary<string, object>>(STORE_NAME, request.Id, cancellationToken: cancellationToken);
 
         if (existingLaptop == null)
         {
-            throw new KeyNotFoundException($"Laptop với ID '{request.Id}' không tồn tại.");
+            throw new KeyNotFoundException($"Product với ID '{request.Id}' không tồn tại.");
         }
 
         var updatedLaptop = new Dictionary<string, object>

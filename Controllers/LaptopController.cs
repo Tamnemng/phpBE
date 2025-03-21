@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/laptops")]
+[Route("api/products")]
 public class LaptopController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -15,7 +15,7 @@ public class LaptopController : ControllerBase
     [HttpGet("get/{id}")]
     public async Task<IActionResult> GetLaptopById(string id)
     {
-        var value = await _mediator.Send(new GetLaptopByIdQuery(id));
+        var value = await _mediator.Send(new GetProductByIdQuery(id));
         if (value == null)
             return NotFound();
         return Ok(value);
@@ -24,26 +24,26 @@ public class LaptopController : ControllerBase
     [HttpGet("get")]
     public async Task<IActionResult> GetAllLaptops([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
     {
-        var values = await _mediator.Send(new GetAllLaptopQuery(pageIndex, pageSize));
+        var values = await _mediator.Send(new GetAllProductQuery(pageIndex, pageSize));
         return Ok(values);
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddLaptop([FromBody] AddLaptopCommand command)
+    public async Task<IActionResult> AddLaptop([FromBody] AddProductCommand command)
     {
         await _mediator.Send(command);
-        return Ok(new { message = "Laptop đã được thêm thành công!" });
+        return Ok(new { message = "Thêm thành công!" });
     }
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> DeleteLaptop(string id)
     {
-        await _mediator.Send(new DeleteLaptopCommand(id));
+        await _mediator.Send(new DeleteProductCommand(id));
         return Ok("Xóa thành công.");
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateLaptop([FromBody] UpdateLaptopCommand command)
+    public async Task<IActionResult> UpdateLaptop([FromBody] UpdateProductCommand command)
     {
         await _mediator.Send(command);
         return Ok("Cập nhật thành công.");

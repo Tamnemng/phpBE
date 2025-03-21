@@ -1,12 +1,12 @@
 using MediatR;
 
-public class UpdateLaptopCommand : IRequest<Unit>
+public class UpdateProductCommand : IRequest<Unit>
 {
     public string Id { get; set; }
     public string Name { get; set; }
     public Dictionary<string, object> Labels { get; set; }
 
-    public UpdateLaptopCommand(string id, string name, Dictionary<string, object> labels)
+    public UpdateProductCommand(string id, string name, Dictionary<string, object> labels)
     {
         Id = id;
         Name = name;
