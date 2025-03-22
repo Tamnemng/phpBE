@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/products")]
-public class LaptopController : ControllerBase
+public class ProductController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public LaptopController(IMediator mediator)
+    public ProductController(IMediator mediator)
     {
         _mediator = mediator;
     }
@@ -49,4 +49,10 @@ public class LaptopController : ControllerBase
         return Ok("Cập nhật thành công.");
     }
 
+    [HttpGet("get-by-category/{categoryId}")]
+    public async Task<IActionResult> GetProductsByCategory(string categoryId)
+    {
+        var products = await _mediator.Send(new GetProductsByCategoryQuery(categoryId));
+        return Ok(products);
+    }
 }

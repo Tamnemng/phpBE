@@ -8,7 +8,7 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
     private readonly DaprClient _daprClient;
     private const string STORE_NAME = "statestore";
     private const string PRODUCT_LIST_KEY = "product_list";
-
+    private const string CATEGORY_PREFIX = "category_";
 
     public AddProductCommandHandler(DaprClient daprClient)
     {
@@ -28,6 +28,15 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
 
         await _daprClient.SaveStateAsync(STORE_NAME, request.Id, request, cancellationToken: cancellationToken);
 
+        var categoryKey = $"{CATEGORY_PREFIX}{request.CategoryId}";
+        var categoryProducts = await _daprClient.GetStateAsync<List<string>>(STORE_NAME, categoryKey, cancellationToken: cancellationToken) ?? new List<string>();
+
+        if (!categoryProducts.Contains(request.Id))
+        {
+            categoryProducts.Add(request.Id);
+            await _daprClient.SaveStateAsync(STORE_NAME, categoryKey, categoryProducts, cancellationToken: cancellationToken);
+        }
+        
         return Unit.Value;
     }
 }
