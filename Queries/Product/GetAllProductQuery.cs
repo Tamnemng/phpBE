@@ -2,7 +2,7 @@
 using MediatR;
 using OMS.Core.Queries;
 
-public class GetAllProductQuery : IRequest<PagedModel<KeyValuePair<string, string>>>
+public class GetAllProductQuery : IRequest<PagedModel<Product>>
 {
     public int PageIndex { get; }
     public int PageSize { get; }

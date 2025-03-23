@@ -39,14 +39,14 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> DeleteLaptop(string id)
     {
         await _mediator.Send(new DeleteProductCommand(id));
-        return Ok("Xóa thành công.");
+        return Ok(new { message = "Xóa thành công." });
     }
 
     [HttpPut("update")]
     public async Task<IActionResult> UpdateLaptop([FromBody] UpdateProductCommand command)
     {
         await _mediator.Send(command);
-        return Ok("Cập nhật thành công.");
+        return Ok(new { message = "Cập nhật thành công." });
     }
 
     [HttpGet("get-by-category/{categoryId}")]

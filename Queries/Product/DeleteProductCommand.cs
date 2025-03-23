@@ -1,6 +1,6 @@
 using MediatR;
 
-public class DeleteProductCommand : IRequest<Unit>
+public class DeleteProductCommand : IRequest<bool>
 {
     public string Id { get; set; }
 
