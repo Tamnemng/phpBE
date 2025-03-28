@@ -2,9 +2,9 @@ using MediatR;
 
 public class DeleteProductCommand : IRequest<bool>
 {
-    public string Id { get; set; }
+    public IEnumerable<string> Id { get; set; }
 
-    public DeleteProductCommand(string id)
+    public DeleteProductCommand(IEnumerable<string> id)
     {
         Id = id;
     }

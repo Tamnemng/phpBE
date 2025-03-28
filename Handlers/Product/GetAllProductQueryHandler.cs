@@ -1,43 +1,43 @@
-using MediatR;
-using Dapr.Client;
-using OMS.Core.Queries;
-using System.Text.Json;
+// using MediatR;
+// using Dapr.Client;
+// using OMS.Core.Queries;
+// using System.Text.Json;
 
-public class GetAllProductQueryHandler : IRequestHandler<GetAllProductQuery, PagedModel<Product>>
-{
-    private readonly DaprClient _daprClient;
-    private const string STORE_NAME = "statestore";
-    private const string PRODUCTS_KEY = "products";
+// public class GetAllBrandQueryHandler : IRequestHandler<GetAllBrandQuery, PagedModel<Brand>>
+// {
+//     private readonly DaprClient _daprClient;
+//     private const string STORE_NAME = "statestore";
+//     private const string KEY = "brands";
 
-    public GetAllProductQueryHandler(DaprClient daprClient)
-    {
-        _daprClient = daprClient;
-    }
+//     public GetAllBrandQueryHandler(DaprClient daprClient)
+//     {
+//         _daprClient = daprClient;
+//     }
 
-    public async Task<PagedModel<Product>> Handle(GetAllProductQuery request, CancellationToken cancellationToken)
-    {
-        if (request.PageIndex < 0)
-        {
-            return new PagedModel<Product>(0, new List<Product>(), 0, request.PageSize);
-        }
-        var products = await _daprClient.GetStateAsync<List<Product>>(STORE_NAME, PRODUCTS_KEY, cancellationToken: cancellationToken) 
-            ?? new List<Product>();
+//     public async Task<PagedModel<Brand>> Handle(GetAllBrandQuery request, CancellationToken cancellationToken)
+//     {
+//         if (request.PageIndex < 0)
+//         {
+//             return new PagedModel<Brand>(0, new List<Brand>(), 0, request.PageSize);
+//         }
+//         var brands = await _daprClient.GetStateAsync<List<Brand>>(STORE_NAME, KEY, cancellationToken: cancellationToken) 
+//             ?? new List<Brand>();
 
-        var totalCount = products.Count;
-        if (totalCount == 0)
-        {
-            return new PagedModel<Product>(0, new List<Product>(), request.PageIndex, request.PageSize);
-        }
+//         var totalCount = brands.Count;
+//         if (totalCount == 0)
+//         {
+//             return new PagedModel<Brand>(0, new List<Brand>(), request.PageIndex, request.PageSize);
+//         }
 
-        // Phân trang
-        int startIndex = request.PageIndex * request.PageSize;
-        if (startIndex >= totalCount)
-        {
-            return new PagedModel<Product>(totalCount, new List<Product>(), request.PageIndex, request.PageSize);
-        }
+//         // Phân trang
+//         int startIndex = request.PageIndex * request.PageSize;
+//         if (startIndex >= totalCount)
+//         {
+//             return new PagedModel<Brand>(totalCount, new List<Brand>(), request.PageIndex, request.PageSize);
+//         }
 
-        var pagedProducts = products.Skip(startIndex).Take(request.PageSize).ToList();
+//         var pagedBrands = brands.Skip(startIndex).Take(request.PageSize).ToList();
 
-        return new PagedModel<Product>(totalCount, pagedProducts, request.PageIndex, request.PageSize);
-    }
-}
+//         return new PagedModel<Brand>(totalCount, pagedBrands, request.PageIndex, request.PageSize);
+//     }
+// }

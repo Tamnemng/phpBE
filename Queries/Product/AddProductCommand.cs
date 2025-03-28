@@ -1,29 +1,24 @@
 using MediatR;
 
-public class Product
-{
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string CategoryId { get; set; }
-    public Dictionary<string, object> Labels { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public string CreatedBy { get; set; }
-    public DateTime? UpdatedDate { get; set; }
-    public string? UpdatedBy { get; set; }
-}
-
 public class AddProductCommand : IRequest<Unit>
 {
-    public string Name { get; set; }
-    public string CategoryId { get; set; }
-    public Dictionary<string, object> Labels { get; set; }
-    public string CreatedBy { get; set; }
+    
+    public string Name { get; set;}
+    public string Code { get; set;}
+    public string ImageUrl { get; set; }
+    public IEnumerable<Category> Categories { get; set; }
+    public ProductStatus Status { get; set; }
+    public Brand Brand { get; set; }
+    public string CreatedBy { get; set;}
 
-    public AddProductCommand(string name, string categoryId, Dictionary<string, object> labels, string createdBy)
+    public AddProductCommand(string name, string code, string imageUrl, ProductStatus status, IEnumerable<Category> categories, Brand brand, string createdBy)
     {
         Name = name;
-        CategoryId = categoryId;
-        Labels = labels;
+        Code = code;
+        ImageUrl = imageUrl;
+        Categories = categories;
+        Brand = brand;
+        Status = status;
         CreatedBy = createdBy;
     }
 }

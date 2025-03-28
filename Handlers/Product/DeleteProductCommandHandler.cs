@@ -1,30 +1,30 @@
 
-using MediatR;
-using Dapr.Client;
+// using MediatR;
+// using Dapr.Client;
 
-public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, bool>
-{
-    private readonly DaprClient _daprClient;
-    private const string STORE_NAME = "statestore";
-    private const string PRODUCTS_KEY = "products";
+// public class DeleteBrandCommandHandler : IRequestHandler<DeleteBrandCommand, bool>
+// {
+//     private readonly DaprClient _daprClient;
+//     private const string STORE_NAME = "statestore";
+//     private const string KEY = "brands";
     
-    public DeleteProductCommandHandler(DaprClient daprClient)
-    {
-        _daprClient = daprClient;
-    }
+//     public DeleteBrandCommandHandler(DaprClient daprClient)
+//     {
+//         _daprClient = daprClient;
+//     }
     
-    public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
-    {
-        var products = await _daprClient.GetStateAsync<List<Product>>(STORE_NAME, PRODUCTS_KEY, cancellationToken: cancellationToken) 
-            ?? new List<Product>();
-        var productToRemove = products.FirstOrDefault(p => p.Id == request.Id);
-        if (productToRemove == null)
-        {
-            return false;
-        }
+//     public async Task<bool> Handle(DeleteBrandCommand request, CancellationToken cancellationToken)
+//     {
+//         var brands = await _daprClient.GetStateAsync<List<Brand>>(STORE_NAME, KEY, cancellationToken: cancellationToken) 
+//             ?? new List<Brand>();
+//         var brand = brands.FirstOrDefault(p => request.Id.Contains(p.Id));
+//         if (brand == null)
+//         {
+//             return false;
+//         }
         
-        products.Remove(productToRemove);
-        await _daprClient.SaveStateAsync(STORE_NAME, PRODUCTS_KEY, products, cancellationToken: cancellationToken);
-        return true;
-    }
-}
+//         brands.Remove(brand);
+//         await _daprClient.SaveStateAsync(STORE_NAME, KEY, brands, cancellationToken: cancellationToken);
+//         return true;
+//     }
+// }
