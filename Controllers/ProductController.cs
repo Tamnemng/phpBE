@@ -1,3 +1,4 @@
+using System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,10 +21,37 @@ public class ProductController : ControllerBase
     // }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddBrand([FromBody] AddProductCommand command)
+    public async Task<IActionResult> AddProduct([FromBody] AddProductCommand command)
     {
-        await _mediator.Send(command);
-        return Ok(new { message = "Thêm thành công!" });
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_INVALID"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
     }
 
     // [HttpDelete("delete/{id}")]

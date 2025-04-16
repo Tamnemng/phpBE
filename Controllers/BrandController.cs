@@ -1,5 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/brands")]
@@ -13,30 +17,96 @@ public class BrandController : ControllerBase
     }
 
     [HttpGet("get")]
-    public async Task<IActionResult> GetAllProduct([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllBrands([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
     {
-        var values = await _mediator.Send(new GetAllBrandQuery(pageIndex, pageSize));
-        return Ok(values);
+        try
+        {
+            var values = await _mediator.Send(new GetAllBrandQuery(pageIndex, pageSize));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách thương hiệu thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_GET_ERROR"));
+        }
     }
 
     [HttpPost("add")]
     public async Task<IActionResult> AddBrand([FromBody] AddBrandCommand command)
     {
-        await _mediator.Send(command);
-        return Ok(new { message = "Thêm thành công!" });
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm thương hiệu thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_ADD_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
     }
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
     {
-        await _mediator.Send(new DeleteBrandCommand(id));
-        return Ok(new { message = "Xóa thành công." });
+        try
+        {
+            await _mediator.Send(new DeleteBrandCommand(id));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa thương hiệu thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_DELETE_ERROR"));
+        }
     }
 
     [HttpPut("update")]
     public async Task<IActionResult> UpdateBrand([FromBody] UpdateBrandCommand command)
     {
-        await _mediator.Send(command);
-        return Ok(new { message = "Cập nhật thành công." });
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
     }
 }

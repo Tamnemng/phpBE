@@ -17,21 +17,12 @@ public class Product : BaseEntity
     {
         ProductInfo = new ProductInfo
         {
-            Id = IdGenerator.GenerateId(20), // Add ID generation similar to ProductInfo constructor
+            Id = IdGenerator.GenerateId(20),
             Name = command.Name,
             Code = command.Code,
             ImageUrl = command.ImageUrl,
-            Brand = new Brand
-            {
-                Name = command.Brand.Name,
-                Code = command.Brand.Code,
-                Logo = command.Brand.Logo
-            },
-            Category = command.Categories.Select(c => new Category
-            {
-                Name = c.Name,
-                Code = c.Code
-            }).ToList(), // Changed to ToList() to ensure it's not just an IEnumerable
+            Brand = command.BrandCode,
+            Category = command.CategoriesCode,
             Status = command.Status
         };
     }
@@ -41,8 +32,8 @@ public class Product : BaseEntity
         ProductInfo.Name = command.Name;
         ProductInfo.ImageUrl = command.ImageUrl;
         ProductInfo.Status = command.Status;
-        ProductInfo.Brand = command.Brand;
-        ProductInfo.Category = command.Categories;
+        ProductInfo.Brand = command.BrandId;
+        ProductInfo.Category = command.CategoriesId;
     }
 
 }

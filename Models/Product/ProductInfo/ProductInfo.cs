@@ -7,16 +7,16 @@ public class ProductInfo
     public string Name { get; set; }
     public string ImageUrl { get; set; }
     public ProductStatus Status { get; set; }
-    public IEnumerable<Category> Category { get; set; }
-    public Brand Brand { get; set; }
+    public IEnumerable<string> Category { get; set; }
+    public string Brand { get; set; }
     public ProductInfo()
     {
         Id = string.Empty;
         Name = string.Empty;
         Code = string.Empty;
         ImageUrl = string.Empty;
-        Brand = new Brand();
-        Category = Enumerable.Empty<Category>();
+        Brand = string.Empty;
+        Category = Enumerable.Empty<string>();
         Status = ProductStatus.New; 
     }
 
@@ -25,18 +25,8 @@ public class ProductInfo
         Name = command.Name;
         Code= command.Code;
         ImageUrl = command.ImageUrl;
-        Brand = new Brand 
-        { 
-            Name = command.Brand.Name,
-            Code = command.Brand.Code,
-            Logo = command.Brand.Logo
-        };
-
-        Category = command.Category.Select(c => new Category 
-        { 
-            Name = c.Name,
-            Code = c.Code
-        });
+        Brand = command.Brand;
+        Category = command.Category;
         Status = command.Status;
     }
 

@@ -10,20 +10,20 @@ public class AddProductDto
     public string ImageUrl { get; set; }
 
     public ProductStatus Status { get; set; } = ProductStatus.InStock;
-    public IEnumerable<Category> Category { get; set; }
+    public IEnumerable<string> Category { get; set; }
 
-    public Brand Brand { get; set; }
+    public string Brand { get; set; }
 
     public AddProductDto()
     {
         Code = string.Empty;
         Name = string.Empty;
-        Category = new List<Category>();
-        Brand = new Brand();
+        Category = new List<string>();
+        Brand = string.Empty;
         ImageUrl = string.Empty;
     }
 
-    public AddProductDto(string name, string code, IEnumerable<Category> categories, Brand brand, string imageUrl)
+    public AddProductDto(string name, string code, IEnumerable<string> categories, string brand, string imageUrl)
     {
         Code = code;
         Name = name;
@@ -41,19 +41,19 @@ public class UpdateProductDto
 
     public ProductStatus Status { get; set; }
 
-    public IEnumerable<Category> Category { get; set; }
-    public Brand Brand { get; set; }
+    public IEnumerable<string> Category { get; set; }
+    public string Brand { get; set; }
 
     public UpdateProductDto()
     {
         Name = string.Empty;
-        Category = new List<Category>();
-        Brand = new Brand();
+        Category = new List<string>();
+        Brand = string.Empty;
         ImageUrl = string.Empty;
         Status = ProductStatus.New;
     }
 
-    public UpdateProductDto(string name, IEnumerable<Category> categories, Brand brand, string imageUrl, ProductStatus status)
+    public UpdateProductDto(string name, IEnumerable<string> categories, string brand, string imageUrl, ProductStatus status)
     {
         Name = name;
         Category = categories;
