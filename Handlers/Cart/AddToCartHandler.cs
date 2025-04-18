@@ -28,8 +28,17 @@ public class AddToCartHandler : IRequestHandler<AddToCartCommand, Unit>
             existingCart = new Cart(command.UserId, new List<CartItem>());
             cartList.Add(existingCart);
         }
-        var newCartItem = new CartItem(command.ProductId, command.Quantity);
-        existingCart.AddItem(newCartItem);
+
+        var existingItem = existingCart.Items.FirstOrDefault(i => i.ProductId == command.ProductId);
+        if (existingItem != null)
+        {
+            existingCart.UpdateItemQuantity(command.ProductId, existingItem.Quantity + command.Quantity);
+        }
+        else
+        {
+
+            existingCart.AddItem(new CartItem(command.ProductId, command.Quantity));
+        }
 
         await _daprClient.SaveStateAsync(
             STORE_NAME,
