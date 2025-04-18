@@ -61,4 +61,38 @@ public class CartController : ControllerBase{
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
         }
     }
+
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteFromCart([FromBody] DeleteFromCartCommand command)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa sản phẩm khỏi giỏ hàng thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CART_DELETE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
+        }
+    }
+
 }
