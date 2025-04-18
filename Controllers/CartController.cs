@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/Carts")]
-public class CartController : ControllerBase{
+public class CartController : ControllerBase
+{
     private readonly IMediator _mediator;
 
     public CartController(IMediator mediator)
@@ -88,6 +89,39 @@ public class CartController : ControllerBase{
         catch (InvalidOperationException ex)
         {
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CART_DELETE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateCart([FromBody] UpdateCartCommand command)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật giỏ hàng thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CART_UPDATE_ERROR"));
         }
         catch (Exception ex)
         {
