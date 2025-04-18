@@ -3,7 +3,7 @@ using Dapr.Client;
 using OMS.Core.Queries;
 using System.Text.Json;
 
-public class GetCartHandler : IRequestHandler<GetCartQuery, Unit>
+public class GetCartHandler : IRequestHandler<GetCartQuery, Cart>
 {
     private readonly DaprClient _daprClient;
     private const string STORE_NAME = "statestore";
@@ -14,7 +14,7 @@ public class GetCartHandler : IRequestHandler<GetCartQuery, Unit>
         _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
     }
 
-    public async Task<Unit> Handle(GetCartQuery request, CancellationToken cancellationToken)
+    public async Task<Cart> Handle(GetCartQuery request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
         var cartList = await _daprClient.GetStateAsync<List<Cart>>(
@@ -24,6 +24,7 @@ public class GetCartHandler : IRequestHandler<GetCartQuery, Unit>
         ) ?? new List<Cart>();
 
         var existingCart = cartList.FirstOrDefault(c => c.UserId == request.userId);
-        return existingCart != null ? Unit.Value : throw new Exception("Cart not found");
+        Console.WriteLine(existingCart);
+        return existingCart ?? throw new Exception("Cart not found");
     }
 }
