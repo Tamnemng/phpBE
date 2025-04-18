@@ -63,7 +63,7 @@ public class BrandController : ControllerBase
         }
     }
 
-    [HttpDelete("delete/{id}")]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
     {
         try

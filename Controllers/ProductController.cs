@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMS.Core.Queries;
 using OMS.Core.Utilities;
 
 [ApiController]
@@ -50,6 +51,42 @@ public class ProductController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_INVALID"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetProductById(string id)
+    {
+        try
+        {
+            var query = new GetProductByIdQuery(id);
+            var product = await _mediator.Send(query);
+            
+            return Ok(ApiResponse<Product>.CreateSuccess(product, "Lấy thông tin sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.NotFound, "PRODUCT_NOT_FOUND"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllProducts([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var query = new GetAllProductsQuery(pageIndex, pageSize);
+            var pagedProducts = await _mediator.Send(query);
+            
+            return Ok(ApiResponse<PagedModel<ProductSummaryDto>>.CreateSuccess(pagedProducts, "Lấy danh sách sản phẩm thành công!"));
         }
         catch (Exception ex)
         {

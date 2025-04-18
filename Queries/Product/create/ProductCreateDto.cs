@@ -25,6 +25,8 @@ public class ProductCreateDto
     
     [Required]
     public List<ProductVariantDto> Variants { get; set; }
+
+    public List<string> GiftCodes { get; set; } = new List<string>();
 }
 
 public class ProductVariantDto

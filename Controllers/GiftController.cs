@@ -6,32 +6,46 @@ using System.Net;
 using System.Threading.Tasks;
 
 [ApiController]
-[Route("api/categories")]
-public class CategoryController : ControllerBase
+[Route("api/gifts")]
+public class GiftController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public CategoryController(IMediator mediator)
+    public GiftController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    [HttpGet("get")]
-    public async Task<IActionResult> GetAllCategories([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    [HttpGet("get_select")]
+    public async Task<IActionResult> GetAllGiftForSelect()
     {
         try
         {
-            var values = await _mediator.Send(new GetAllCategoryQuery(pageIndex, pageSize));
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách danh mục thành công!"));
+            var values = await _mediator.Send(new GetAllGiftNamesQuery());
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách quà tặng thành công!"));
         }
         catch (Exception ex)
         {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CATEGORY_GET_ERROR"));
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "GIFT_GET_ERROR"));
+        }
+    }
+
+    [HttpGet("get")]
+    public async Task<IActionResult> GetAllGifts([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var values = await _mediator.Send(new GetAllGiftQuery(pageIndex, pageSize));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách quà tặng thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "GIFT_GET_ERROR"));
         }
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddCategory([FromBody] AddCategoryCommand command)
+    public async Task<IActionResult> AddBrand([FromBody] AddGiftCommand command)
     {
         if (!ModelState.IsValid)
         {
@@ -51,11 +65,11 @@ public class CategoryController : ControllerBase
         try
         {
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm danh mục thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm thương quà tặng thành công!"));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CATEGORY_ADD_ERROR"));
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "GIFT_ADD_ERROR"));
         }
         catch (Exception ex)
         {
@@ -64,21 +78,21 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteCategory(IEnumerable<string> id)
+    public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
     {
         try
         {
-            await _mediator.Send(new DeleteCategoryCommand(id));
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa danh mục thành công!"));
+            await _mediator.Send(new DeleteGiftCommand(id));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa quà tặng thành công!"));
         }
         catch (Exception ex)
         {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CATEGORY_DELETE_ERROR"));
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_DELETE_ERROR"));
         }
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryCommand command)
+    public async Task<IActionResult> UpdateBrand([FromBody] UpdateGiftCommand command)
     {
         if (!ModelState.IsValid)
         {
@@ -98,11 +112,11 @@ public class CategoryController : ControllerBase
         try
         {
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật danh mục thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CATEGORY_UPDATE_ERROR"));
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "GIFT_UPDATE_ERROR"));
         }
         catch (Exception ex)
         {

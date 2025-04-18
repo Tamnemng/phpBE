@@ -12,13 +12,16 @@ public class AddProductCommand : IRequest<Unit>
     public ProductStatus Status { get; set; }
     public string BrandCode { get; set; }
     public string CreatedBy { get; set; }
-    
+    public List<Gift> Gifts { get; set; }
+    public List<string> GiftCodes { get; set; }
     public List<ProductVariant> Variants { get; set; }
 
     public AddProductCommand() 
     {
         Variants = new List<ProductVariant>();
         CategoriesCode = new List<string>();
+        Gifts = new List<Gift>();
+        GiftCodes = new List<string>();
     }
 
     public AddProductCommand(ProductCreateDto dto)
@@ -30,7 +33,8 @@ public class AddProductCommand : IRequest<Unit>
         BrandCode = dto.BrandCode;
         Status = dto.Status;
         CreatedBy = dto.CreatedBy;
-        
+        GiftCodes = dto.GiftCodes ?? new List<string>();
+        Gifts = new List<Gift>();
         Variants = new List<ProductVariant>();
         if (dto.Variants != null)
         {

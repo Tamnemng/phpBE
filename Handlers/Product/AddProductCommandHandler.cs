@@ -14,6 +14,7 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
     private const string PRODUCTS_KEY = "products";
     private const string BRANDS_KEY = "brands";
     private const string CATEGORIES_KEY = "categories";
+    private const string GIFTS_KEY = "gifts";
 
     public AddProductCommandHandler(DaprClient daprClient)
     {
@@ -25,6 +26,10 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
         var products = await _daprClient.GetStateAsync<List<Product>>(STORE_NAME, PRODUCTS_KEY, cancellationToken: cancellationToken)
             ?? new List<Product>();
         
+        if (products.Any(p => p.ProductInfo.Code.Equals(command.Code, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException($"Product with code '{command.Code}' already exists.");
+        }
         // Checking brand
         var brands = await _daprClient.GetStateAsync<List<BrandMetaData>>(
             STORE_NAME, 
@@ -52,39 +57,48 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             }
         }
 
+        if (command.GiftCodes != null && command.GiftCodes.Any())
+        {
+            var gifts = await _daprClient.GetStateAsync<List<GiftMetaData>>(
+                STORE_NAME, 
+                GIFTS_KEY, 
+                cancellationToken: cancellationToken
+            ) ?? new List<GiftMetaData>();
+            
+            foreach (var giftCode in command.GiftCodes)
+            {
+                var giftMetadata = gifts.FirstOrDefault(g => g.Code.Equals(giftCode, StringComparison.OrdinalIgnoreCase));
+                if (giftMetadata == null)
+                {
+                    throw new InvalidOperationException($"Gift with code '{giftCode}' does not exist.");
+                }
+                
+                // Create a Gift object from the metadata and add it to the command's Gifts collection
+                command.Gifts.Add(new Gift(giftMetadata.Name, giftMetadata.Code, giftMetadata.Image));
+            }
+        }
+
         if (command.Variants != null && command.Variants.Any())
         {
-            // Nhóm các biến thể theo tiêu đề tùy chọn (ví dụ: "Color", "Size", vv)
             var variantsByOption = command.Variants
                 .GroupBy(v => v.OptionTitle)
                 .ToDictionary(g => g.Key, g => g.ToList());
             
-            // Lấy tiêu đề tùy chọn đầu tiên để tạo các biến thể sản phẩm
             var firstOptionTitle = variantsByOption.Keys.FirstOrDefault();
             
             if (firstOptionTitle != null)
             {
-                // Pre-generate IDs for all options to ensure consistency
                 var optionIdMap = new Dictionary<string, string>();
                 foreach (var variant in variantsByOption[firstOptionTitle])
                 {
-                    // Generate a unique ID for each option label
                     optionIdMap[variant.OptionLabel] = IdGenerator.GenerateId(20);
                 }
                 
-                // Tạo sản phẩm cho mỗi biến thể của tùy chọn đầu tiên
                 foreach (var variant in variantsByOption[firstOptionTitle])
                 {
-                    // Sử dụng ID đã tạo trước cho tùy chọn này
                     string productId = optionIdMap[variant.OptionLabel];
-                    
-                    // Tạo sản phẩm với constructor mới
                     var productVariation = new Product(command, productId, variant);
-                    
-                    // Tạo các tùy chọn sản phẩm
                     var productOptions = new List<ProductOption>();
-                    
-                    // Thêm tùy chọn chính (như màu sắc)
                     var mainOptions = new List<Option>();
                     foreach (var optionLabel in optionIdMap.Keys)
                     {
@@ -97,8 +111,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                         ));
                     }
                     productOptions.Add(new ProductOption(firstOptionTitle, mainOptions));
-                    
-                    // Thêm các tùy chọn khác nếu có
                     foreach (var optionTitle in variantsByOption.Keys.Where(k => k != firstOptionTitle))
                     {
                         var options = new List<Option>();
@@ -108,7 +120,7 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                                 otherVariant.OptionLabel,
                                 IdGenerator.GenerateId(20),
                                 otherVariant.Quantity,
-                                false // Mặc định không được chọn
+                                false
                             ));
                         }
                         productOptions.Add(new ProductOption(optionTitle, options));
@@ -121,7 +133,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
         }
         else
         {
-            // Không có biến thể, tạo một sản phẩm đơn lẻ
             throw new InvalidOperationException("Phải cung cấp ít nhất một biến thể sản phẩm.");
         }
 
