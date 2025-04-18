@@ -18,16 +18,16 @@ public class DeleteBrandCommandHandler : IRequestHandler<DeleteBrandCommand, boo
         var brands = await _daprClient.GetStateAsync<List<BrandMetaData>>(STORE_NAME, KEY, cancellationToken: cancellationToken)
            ?? new List<BrandMetaData>();
 
-        var existingIds = brands.Select(b => b.Id).ToList();
+        var existingIds = brands.Select(b => b.Code).ToList();
         var nonExistingIds = request.Id.Where(id => !existingIds.Contains(id)).ToList();
 
         if (nonExistingIds.Any())
         {
-            throw new InvalidOperationException($"Không tìm thấy thương hiệu với ID: {string.Join(", ", nonExistingIds)}");
+            throw new InvalidOperationException($"Không tìm thấy thương hiệu với CODE: {string.Join(", ", nonExistingIds)}");
         }
 
         var initialCount = brands.Count;
-        brands.RemoveAll(brand => request.Id.Contains(brand.Id));
+        brands.RemoveAll(brand => request.Id.Contains(brand.Code));
 
         if (brands.Count == initialCount)
         {

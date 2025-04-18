@@ -26,33 +26,49 @@ public class GetAllProductsQueryHandler : IRequestHandler<GetAllProductsQuery, P
             return new PagedModel<ProductSummaryDto>(0, new List<ProductSummaryDto>(), 0, request.PageSize);
         }
         
-        // Lấy danh sách sản phẩm
         var products = await _daprClient.GetStateAsync<List<Product>>(
             STORE_NAME, 
             PRODUCTS_KEY, 
             cancellationToken: cancellationToken
         ) ?? new List<Product>();
 
-        // Lấy danh sách thương hiệu
         var brands = await _daprClient.GetStateAsync<List<BrandMetaData>>(
             STORE_NAME,
             BRANDS_KEY,
             cancellationToken: cancellationToken
         ) ?? new List<BrandMetaData>();
 
-        // Tạo một dictionary để map từ brand code đến brand name
         var brandDict = brands.ToDictionary(b => b.Code, b => b.Name);
 
-        // Xử lý sản phẩm trùng code bằng cách chỉ lấy sản phẩm đầu tiên cho mỗi code
         var uniqueProducts = products
             .GroupBy(p => p.ProductInfo.Code)
             .Select(g => g.First())
             .ToList();
         
-        // Tạo danh sách ProductSummaryDto từ danh sách sản phẩm sau khi đã lọc trùng
-        var productSummaries = uniqueProducts.Select(p => 
+        var filteredProducts = uniqueProducts.AsQueryable();
+        
+        if (!string.IsNullOrWhiteSpace(request.ProductName))
         {
-            // Lấy tên thương hiệu từ brand code, nếu không tìm thấy thì để trống
+            filteredProducts = filteredProducts.Where(p => 
+                p.ProductInfo.Name.Contains(request.ProductName, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(request.BrandCode))
+        {
+            filteredProducts = filteredProducts.Where(p => 
+                p.ProductInfo.Brand == request.BrandCode);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(request.CategoryCode))
+        {
+            filteredProducts = filteredProducts.Where(p => 
+                p.ProductInfo.Category != null && 
+                p.ProductInfo.Category.Contains(request.CategoryCode));
+        }
+        
+        var filteredProductsList = filteredProducts.ToList();
+        var productSummaries = filteredProductsList.Select(p => 
+        {
             string brandName = string.Empty;
             if (!string.IsNullOrEmpty(p.ProductInfo.Brand) && brandDict.ContainsKey(p.ProductInfo.Brand))
             {

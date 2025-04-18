@@ -42,10 +42,10 @@ public class ProductController : ControllerBase
         {
             // Chuyển đổi từ DTO sang Command
             var command = new AddProductCommand(productDto);
-            
+
             // Gửi command đến handler xử lý
             await _mediator.Send(command);
-            
+
             return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm sản phẩm thành công!"));
         }
         catch (InvalidOperationException ex)
@@ -65,7 +65,7 @@ public class ProductController : ControllerBase
         {
             var query = new GetProductByIdQuery(id);
             var product = await _mediator.Send(query);
-            
+
             return Ok(ApiResponse<Product>.CreateSuccess(product, "Lấy thông tin sản phẩm thành công!"));
         }
         catch (InvalidOperationException ex)
@@ -79,18 +79,36 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProducts([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllProducts([FromQuery] string? productName = null, [FromQuery] string? brandCode = null, [FromQuery] string? categoryCode = null, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
     {
         try
         {
-            var query = new GetAllProductsQuery(pageIndex, pageSize);
+            var query = new GetAllProductsQuery(
+                productName,
+                brandCode,
+                categoryCode,
+                pageIndex,
+                pageSize);
             var pagedProducts = await _mediator.Send(query);
-            
+
             return Ok(ApiResponse<PagedModel<ProductSummaryDto>>.CreateSuccess(pagedProducts, "Lấy danh sách sản phẩm thành công!"));
         }
         catch (Exception ex)
         {
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteBrand(IEnumerable<string> code)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteProductCommand(code));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa sản phẩm thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_DELETE_ERROR"));
         }
     }
 }

@@ -28,12 +28,12 @@ public class DeleteGiftCommandHandler : IRequestHandler<DeleteGiftCommand, bool>
 
         int initialCount = giftMetadataList.Count;
         giftMetadataList = giftMetadataList
-            .Where(g => !command.Id.Contains(g.Id))
+            .Where(g => !command.Id.Contains(g.Code))
             .ToList();
 
         if (giftMetadataList.Count == initialCount)
         {
-            throw new InvalidOperationException($"Không tìm thấy quà tặng với ID: {string.Join(", ", command.Id)}");
+            throw new InvalidOperationException($"Không tìm thấy quà tặng với CODE: {string.Join(", ", command.Id)}");
 
         }
 

@@ -19,16 +19,16 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
         var categories = await _daprClient.GetStateAsync<List<Category>>(STORE_NAME, KEY, cancellationToken: cancellationToken)
             ?? new List<Category>();
 
-        var existingIds = categories.Select(b => b.Id).ToList();
+        var existingIds = categories.Select(b => b.Code).ToList();
         var nonExistingIds = request.Id.Where(id => !existingIds.Contains(id)).ToList();
 
         if (nonExistingIds.Any())
         {
-            throw new InvalidOperationException($"Không tìm thấy tag với ID: {string.Join(", ", nonExistingIds)}");
+            throw new InvalidOperationException($"Không tìm thấy tag với CODE: {string.Join(", ", nonExistingIds)}");
         }
 
         var initialCount = categories.Count;
-        categories.RemoveAll(category => request.Id.Contains(category.Id));
+        categories.RemoveAll(category => request.Id.Contains(category.Code));
 
         if (categories.Count == initialCount)
         {
