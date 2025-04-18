@@ -2,62 +2,61 @@ using System.Text.Json.Serialization;
 using MediatR;
 using System.Collections.Generic;
 
-public class AddProductCommand : IRequest<Unit>
+public class UpdateProductCommand : IRequest<Unit>
 {
+    public string Id { get; set; }
     public string Name { get; set; }
-    public string Code { get; set; }
     public string ImageUrl { get; set; }
     public IEnumerable<string> CategoriesCode { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ProductStatus Status { get; set; }
     public string BrandCode { get; set; }
-    public string CreatedBy { get; set; }
-    public List<Gift> Gifts { get; set; }
-    public List<string> GiftCodes { get; set; }
-    public List<VariantGroup> Variants { get; set; }
+    public string UpdatedBy { get; set; }
+    public UpdatePriceCommand Price { get; set; }
+    public List<Gift> Gifts { get; set; } = new List<Gift>();
+    public List<string> GiftCodes { get; set; } = new List<string>();
+    public List<VariantGroupUpdate> Variants { get; set; } = new List<VariantGroupUpdate>();
+    public string ShortDescription { get; set; }
 
-    public AddProductCommand() 
+    public UpdateProductCommand() 
     {
-        Variants = new List<VariantGroup>();
         CategoriesCode = new List<string>();
-        Gifts = new List<Gift>();
-        GiftCodes = new List<string>();
     }
 
-    public AddProductCommand(ProductCreateDto dto)
+    public UpdateProductCommand(ProductUpdateDto dto)
     {
+        Id = dto.Id;
         Name = dto.Name;
-        Code = dto.Code;
         ImageUrl = dto.ImageUrl;
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
-        CreatedBy = dto.CreatedBy;
+        UpdatedBy = dto.UpdatedBy;
+        Price = dto.Price;
         GiftCodes = dto.GiftCodes ?? new List<string>();
-        Gifts = new List<Gift>();
-        Variants = new List<VariantGroup>();
+        ShortDescription = dto.ShortDescription;
         
         if (dto.Variants != null)
         {
-            foreach (var variantGroup in dto.Variants)
+            foreach (var groupDto in dto.Variants)
             {
-                var group = new VariantGroup
+                var group = new VariantGroupUpdate
                 {
-                    OptionTitle = variantGroup.OptionTitle,
-                    Options = new List<ProductVariant>()
+                    OptionTitle = groupDto.OptionTitle,
+                    Options = new List<ProductVariantUpdate>()
                 };
                 
-                foreach (var optionDto in variantGroup.Options)
+                foreach (var optionDto in groupDto.Options)
                 {
-                    group.Options.Add(new ProductVariant
+                    group.Options.Add(new ProductVariantUpdate
                     {
                         OptionLabel = optionDto.OptionLabel,
                         Quantity = optionDto.Quantity,
                         OriginalPrice = optionDto.OriginalPrice,
                         CurrentPrice = optionDto.CurrentPrice,
                         Barcode = optionDto.Barcode,
-                        Descriptions = optionDto.Descriptions ?? new List<Description>(),
-                        Images = optionDto.Images ?? new List<Image>(),
+                        Descriptions = optionDto.Descriptions,
+                        Images = optionDto.Images,
                         ShortDescription = optionDto.ShortDescription
                     });
                 }
@@ -68,19 +67,19 @@ public class AddProductCommand : IRequest<Unit>
     }
 }
 
-public class VariantGroup
+public class VariantGroupUpdate
 {
     public string OptionTitle { get; set; }
-    public List<ProductVariant> Options { get; set; } = new List<ProductVariant>();
+    public List<ProductVariantUpdate> Options { get; set; } = new List<ProductVariantUpdate>();
 }
 
-public class ProductVariant
+public class ProductVariantUpdate
 {
     public string OptionLabel { get; set; }
     public int Quantity { get; set; }
-    public decimal OriginalPrice { get; set; }
-    public decimal CurrentPrice { get; set; }
-    public int Barcode { get; set; }
+    public decimal? OriginalPrice { get; set; }
+    public decimal? CurrentPrice { get; set; }
+    public int? Barcode { get; set; }
     public IEnumerable<Description> Descriptions { get; set; }
     public IEnumerable<Image> Images { get; set; }
     public string ShortDescription { get; set; }

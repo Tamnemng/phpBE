@@ -5,12 +5,14 @@ public class Product : BaseEntity
     public ProductDetail ProductDetail { get; set; } = new ProductDetail();
     public List<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
     public List<Gift> Gifts { get; set; } = new List<Gift>();
+
     public Product()
     {
         ProductInfo = new ProductInfo();
         Price = new Price();
         ProductOptions = new List<ProductOption>();
     }
+
     public Product(AddProductCommand command, string productId, ProductVariant variant) : base(command.CreatedBy)
     {
         ProductInfo = new ProductInfo
@@ -31,16 +33,33 @@ public class Product : BaseEntity
             variant.Images,
             variant.ShortDescription
         );
-        
+
         ProductOptions = new List<ProductOption>();
     }
 
     public void Update(UpdateProductCommand command)
     {
+        base.Update(command.UpdatedBy);
+
         ProductInfo.Name = command.Name;
         ProductInfo.ImageUrl = command.ImageUrl;
         ProductInfo.Status = command.Status;
-        ProductInfo.Brand = command.BrandId;
-        ProductInfo.Category = command.CategoriesId;
+        ProductInfo.Brand = command.BrandCode;
+        ProductInfo.Category = command.CategoriesCode;
+
+        if (command.Price != null)
+        {
+            Price.Update(command.Price);
+        }
+
+        if (!string.IsNullOrEmpty(command.ShortDescription))
+        {
+            ProductDetail.ShortDescription = command.ShortDescription;
+        }
+
+        if (command.Gifts != null && command.Gifts.Any())
+        {
+            Gifts = command.Gifts;
+        }
     }
 }

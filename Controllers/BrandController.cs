@@ -16,6 +16,20 @@ public class BrandController : ControllerBase
         _mediator = mediator;
     }
 
+    [HttpGet("get_select")]
+    public async Task<IActionResult> GetAllBrandForSelect()
+    {
+        try
+        {
+            var values = await _mediator.Send(new GetAllBrandNamesQuery());
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách hãng thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_GET_ERROR"));
+        }
+    }
+
     [HttpGet("get")]
     public async Task<IActionResult> GetAllBrands([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
     {

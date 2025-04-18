@@ -2,13 +2,13 @@ using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class ProductCreateDto
+public class ProductUpdateDto
 {
     [Required]
-    public string Name { get; set; }
+    public string Id { get; set; }
     
     [Required]
-    public string Code { get; set; }
+    public string Name { get; set; }
     
     public string ImageUrl { get; set; }
     
@@ -21,37 +21,38 @@ public class ProductCreateDto
     [Required]
     public string BrandCode { get; set; }
     
-    public string CreatedBy { get; set; }
+    public string UpdatedBy { get; set; }
     
-    [Required]
-    public List<VariantGroupDto> Variants { get; set; }
+    public UpdatePriceCommand Price { get; set; }
+    
+    public List<VariantGroupUpdateDto> Variants { get; set; }
 
     public List<string> GiftCodes { get; set; } = new List<string>();
+    
+    public string ShortDescription { get; set; }
 }
 
-public class VariantGroupDto
+public class VariantGroupUpdateDto
 {
     [Required]
-    public string OptionTitle { get; set; } // Example: "Color"
+    public string OptionTitle { get; set; }
     
     [Required]
-    public List<ProductVariantDto> Options { get; set; }
+    public List<ProductVariantUpdateDto> Options { get; set; }
 }
 
-public class ProductVariantDto
+public class ProductVariantUpdateDto
 {
     [Required]
-    public string OptionLabel { get; set; } // Example: "Red"
+    public string OptionLabel { get; set; }
     
-    public int Quantity { get; set; } = 0;
+    public int Quantity { get; set; }
     
-    [Required]
-    public decimal OriginalPrice { get; set; }
+    public decimal? OriginalPrice { get; set; }
     
-    [Required]
-    public decimal CurrentPrice { get; set; }
+    public decimal? CurrentPrice { get; set; }
     
-    public int Barcode { get; set; }
+    public int? Barcode { get; set; }
     
     public IEnumerable<Description> Descriptions { get; set; }
     

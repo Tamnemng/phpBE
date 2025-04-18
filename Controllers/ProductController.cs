@@ -40,10 +40,21 @@ public class ProductController : ControllerBase
 
         try
         {
-            // Chuyển đổi từ DTO sang Command
+            // Validate that we have at least one variant group with options
+            if (productDto.Variants == null || !productDto.Variants.Any() || 
+                productDto.Variants.Any(v => v.Options == null || !v.Options.Any()))
+            {
+                return BadRequest(ApiResponse<object>.CreateError(
+                    "At least one variant group with options is required",
+                    HttpStatusCode.BadRequest,
+                    "VALIDATION_ERROR"
+                ));
+            }
+
+            // Convert from DTO to Command
             var command = new AddProductCommand(productDto);
 
-            // Gửi command đến handler xử lý
+            // Send command to handler
             await _mediator.Send(command);
 
             return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm sản phẩm thành công!"));
@@ -109,6 +120,45 @@ public class ProductController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_DELETE_ERROR"));
+        }
+    }
+
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateProduct([FromBody] ProductUpdateDto productDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            // Convert from DTO to Command
+            var command = new UpdateProductCommand(productDto);
+
+            // Send command to handler
+            await _mediator.Send(command);
+
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
 }

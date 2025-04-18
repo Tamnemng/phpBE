@@ -30,6 +30,20 @@ public class CategoryController : ControllerBase
         }
     }
 
+    [HttpGet("get_select")]
+    public async Task<IActionResult> GetAllCategoriesForSelect()
+    {
+        try
+        {
+            var values = await _mediator.Send(new GetAllCategoryNamesQuery());
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách tag thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "CATEGORIES_GET_ERROR"));
+        }
+    }
+
     [HttpPost("add")]
     public async Task<IActionResult> AddCategory([FromBody] AddCategoryCommand command)
     {

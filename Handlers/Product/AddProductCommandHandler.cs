@@ -30,6 +30,7 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
         {
             throw new InvalidOperationException($"Product with code '{command.Code}' already exists.");
         }
+        
         // Checking brand
         var brands = await _daprClient.GetStateAsync<List<BrandMetaData>>(
             STORE_NAME, 
@@ -57,6 +58,7 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             }
         }
 
+        // Process gifts if specified
         if (command.GiftCodes != null && command.GiftCodes.Any())
         {
             var gifts = await _daprClient.GetStateAsync<List<GiftMetaData>>(
@@ -78,62 +80,70 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             }
         }
 
+        // Process variants with new structure
         if (command.Variants != null && command.Variants.Any())
         {
-            var variantsByOption = command.Variants
-                .GroupBy(v => v.OptionTitle)
-                .ToDictionary(g => g.Key, g => g.ToList());
-            
-            var firstOptionTitle = variantsByOption.Keys.FirstOrDefault();
-            
-            if (firstOptionTitle != null)
+            // Ensure we have at least one variant group
+            var firstGroup = command.Variants.FirstOrDefault();
+            if (firstGroup == null || !firstGroup.Options.Any())
             {
-                var optionIdMap = new Dictionary<string, string>();
-                foreach (var variant in variantsByOption[firstOptionTitle])
-                {
-                    optionIdMap[variant.OptionLabel] = IdGenerator.GenerateId(20);
-                }
+                throw new InvalidOperationException("At least one variant option is required.");
+            }
+            
+            // Generate IDs for each option in the first variant group
+            var optionIdMap = new Dictionary<string, string>();
+            foreach (var variant in firstGroup.Options)
+            {
+                optionIdMap[variant.OptionLabel] = IdGenerator.GenerateId(20);
+            }
+            
+            // Create a product for each option in the first variant group
+            foreach (var variant in firstGroup.Options)
+            {
+                string productId = optionIdMap[variant.OptionLabel];
+                var productVariation = new Product(command, productId, variant);
                 
-                foreach (var variant in variantsByOption[firstOptionTitle])
+                // Create product options for the current product
+                var productOptions = new List<ProductOption>();
+                
+                // Add options from the first group (main options)
+                var mainOptions = new List<Option>();
+                foreach (var optionLabel in optionIdMap.Keys)
                 {
-                    string productId = optionIdMap[variant.OptionLabel];
-                    var productVariation = new Product(command, productId, variant);
-                    var productOptions = new List<ProductOption>();
-                    var mainOptions = new List<Option>();
-                    foreach (var optionLabel in optionIdMap.Keys)
+                    bool isSelected = optionLabel == variant.OptionLabel;
+                    var optionVariant = firstGroup.Options.FirstOrDefault(v => v.OptionLabel == optionLabel);
+                    mainOptions.Add(new Option(
+                        optionLabel,
+                        optionIdMap[optionLabel],
+                        optionVariant?.Quantity ?? 0,
+                        isSelected
+                    ));
+                }
+                productOptions.Add(new ProductOption(firstGroup.OptionTitle, mainOptions));
+                
+                // Add options from other variant groups
+                foreach (var group in command.Variants.Skip(1))
+                {
+                    var options = new List<Option>();
+                    foreach (var otherVariant in group.Options)
                     {
-                        bool isSelected = optionLabel == variant.OptionLabel;
-                        mainOptions.Add(new Option(
-                            optionLabel,
-                            optionIdMap[optionLabel],
-                            variantsByOption[firstOptionTitle].FirstOrDefault(v => v.OptionLabel == optionLabel)?.Quantity ?? 0,
-                            isSelected
+                        options.Add(new Option(
+                            otherVariant.OptionLabel,
+                            IdGenerator.GenerateId(20),
+                            otherVariant.Quantity,
+                            false
                         ));
                     }
-                    productOptions.Add(new ProductOption(firstOptionTitle, mainOptions));
-                    foreach (var optionTitle in variantsByOption.Keys.Where(k => k != firstOptionTitle))
-                    {
-                        var options = new List<Option>();
-                        foreach (var otherVariant in variantsByOption[optionTitle])
-                        {
-                            options.Add(new Option(
-                                otherVariant.OptionLabel,
-                                IdGenerator.GenerateId(20),
-                                otherVariant.Quantity,
-                                false
-                            ));
-                        }
-                        productOptions.Add(new ProductOption(optionTitle, options));
-                    }
-                    
-                    productVariation.ProductOptions = productOptions;
-                    products.Add(productVariation);
+                    productOptions.Add(new ProductOption(group.OptionTitle, options));
                 }
+                
+                productVariation.ProductOptions = productOptions;
+                products.Add(productVariation);
             }
         }
         else
         {
-            throw new InvalidOperationException("Phải cung cấp ít nhất một biến thể sản phẩm.");
+            throw new InvalidOperationException("At least one variant group with options is required.");
         }
 
         await _daprClient.SaveStateAsync(STORE_NAME, PRODUCTS_KEY, products, cancellationToken: cancellationToken);
