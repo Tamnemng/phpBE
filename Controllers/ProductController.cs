@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMS.Core.Utilities;
 
 [ApiController]
 [Route("api/products")]
@@ -13,15 +18,8 @@ public class ProductController : ControllerBase
         _mediator = mediator;
     }
 
-    // [HttpGet("get")]
-    // public async Task<IActionResult> GetAllProduct([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
-    // {
-    //     var values = await _mediator.Send(new GetAllBrandQuery(pageIndex, pageSize));
-    //     return Ok(values);
-    // }
-
     [HttpPost("add")]
-    public async Task<IActionResult> AddProduct([FromBody] AddProductCommand command)
+    public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productDto)
     {
         if (!ModelState.IsValid)
         {
@@ -41,7 +39,12 @@ public class ProductController : ControllerBase
 
         try
         {
+            // Chuyển đổi từ DTO sang Command
+            var command = new AddProductCommand(productDto);
+            
+            // Gửi command đến handler xử lý
             await _mediator.Send(command);
+            
             return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm sản phẩm thành công!"));
         }
         catch (InvalidOperationException ex)
@@ -53,18 +56,4 @@ public class ProductController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
-
-    // [HttpDelete("delete/{id}")]
-    // public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
-    // {
-    //     await _mediator.Send(new DeleteBrandCommand(id));
-    //     return Ok(new { message = "Xóa thành công." });
-    // }
-
-    // [HttpPut("update")]
-    // public async Task<IActionResult> UpdateBrand([FromBody] UpdateBrandCommand command)
-    // {
-    //     await _mediator.Send(command);
-    //     return Ok(new { message = "Cập nhật thành công." });
-    // }
 }
