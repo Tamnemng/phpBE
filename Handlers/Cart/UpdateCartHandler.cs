@@ -29,14 +29,23 @@ public class UpdateCartHandler : IRequestHandler<UpdateCartCommand, Unit>
             cartList.Add(existingCart);
         }
 
-        var existingItem = existingCart.Items.FirstOrDefault(i => i.ProductId == command.ProductId);
-        if (existingItem != null)
+        if (command.OldProductId != command.NewProductId)
         {
-            existingCart.UpdateItemQuantity(command.ProductId, command.Quantity);
+            existingCart.RemoveItem(command.OldProductId);
+
+            var newItem = existingCart.Items.FirstOrDefault(i => i.ProductId == command.NewProductId);
+            if (newItem != null)
+            {
+                existingCart.UpdateItemQuantity(command.NewProductId, newItem.Quantity + command.Quantity);
+            }
+            else
+            {
+                existingCart.AddItem(new CartItem(command.NewProductId, command.Quantity));
+            }
         }
         else
         {
-            existingCart.AddItem(new CartItem(command.ProductId, command.Quantity));
+            existingCart.UpdateItemQuantity(command.NewProductId, command.Quantity);
         }
 
         await _daprClient.SaveStateAsync(
