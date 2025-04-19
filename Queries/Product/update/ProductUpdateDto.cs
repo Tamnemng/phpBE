@@ -12,7 +12,7 @@ public class ProductUpdateDto
     
     public string ImageUrl { get; set; }
     
-    // Add ImageBase64 property for Cloudinary upload
+    // Required for image updates
     public string ImageBase64 { get; set; }
     
     [Required]
@@ -59,9 +59,8 @@ public class ProductVariantUpdateDto
     
     public IEnumerable<Description> Descriptions { get; set; }
     
-    public IEnumerable<Image> Images { get; set; }
-    
-    // Add support for base64 encoded images
+    // Remove Images collection that accepts URLs
+    // Only accept Base64 encoded images for updates
     public IEnumerable<ImageBase64Dto> ImagesBase64 { get; set; }
     
     public string ShortDescription { get; set; }

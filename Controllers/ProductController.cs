@@ -43,7 +43,6 @@ public class ProductController : ControllerBase
 
         try
         {
-            // Validate that we have at least one variant group with options
             if (productDto.Variants == null || !productDto.Variants.Any() || 
                 productDto.Variants.Any(v => v.Options == null || !v.Options.Any()))
             {
@@ -54,16 +53,44 @@ public class ProductController : ControllerBase
                 ));
             }
 
-            // Upload image to Cloudinary if base64 is provided
-            if (!string.IsNullOrEmpty(productDto.ImageBase64))
+            bool missingImages = false;
+            foreach (var group in productDto.Variants)
             {
-                productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
+                foreach (var option in group.Options)
+                {
+                    if (option.ImagesBase64 == null || !option.ImagesBase64.Any())
+                    {
+                        missingImages = true;
+                        break;
+                    }
+                }
+                if (missingImages) break;
             }
 
-            // Convert from DTO to Command
-            var command = new AddProductCommand(productDto);
+            if (missingImages)
+            {
+                return BadRequest(ApiResponse<object>.CreateError(
+                    "All variants must have at least one Base64 image",
+                    HttpStatusCode.BadRequest,
+                    "VALIDATION_ERROR"
+                ));
+            }
 
-            // Send command to handler
+            if (string.IsNullOrEmpty(productDto.ImageBase64))
+            {
+                return BadRequest(ApiResponse<object>.CreateError(
+                    "Product main image in Base64 format is required",
+                    HttpStatusCode.BadRequest,
+                    "VALIDATION_ERROR"
+                ));
+            }
+
+            productDto.ImageBase64 = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
+
+            var command = new AddProductCommand(productDto);
+            
+            command.ImageUrl = productDto.ImageBase64;
+
             await _mediator.Send(command);
 
             return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm sản phẩm thành công!"));
@@ -154,16 +181,13 @@ public class ProductController : ControllerBase
 
         try
         {
-            // Upload image to Cloudinary if base64 is provided
             if (!string.IsNullOrEmpty(productDto.ImageBase64))
             {
                 productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
             }
 
-            // Convert from DTO to Command
             var command = new UpdateProductCommand(productDto);
 
-            // Send command to handler
             await _mediator.Send(command);
 
             return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật sản phẩm thành công!"));

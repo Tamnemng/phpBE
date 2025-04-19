@@ -27,7 +27,7 @@ public class UpdateProductCommand : IRequest<Unit>
     {
         Id = dto.Id;
         Name = dto.Name;
-        ImageUrl = dto.ImageUrl; // This now might contain the Cloudinary URL
+        ImageUrl = dto.ImageUrl; // This will be updated in controller if ImageBase64 is provided
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
@@ -56,7 +56,8 @@ public class UpdateProductCommand : IRequest<Unit>
                         CurrentPrice = optionDto.CurrentPrice,
                         Barcode = optionDto.Barcode,
                         Descriptions = optionDto.Descriptions,
-                        Images = optionDto.Images,
+                        Images = null, // Will be populated from ImagesBase64 after upload
+                        ImagesBase64 = optionDto.ImagesBase64,
                         ShortDescription = optionDto.ShortDescription
                     });
                 }

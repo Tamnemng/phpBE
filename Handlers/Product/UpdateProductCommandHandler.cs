@@ -26,14 +26,12 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
     public async Task<Unit> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
     {
-        // Get all products
         var products = await _daprClient.GetStateAsync<List<Product>>(
             STORE_NAME, 
             PRODUCTS_KEY, 
             cancellationToken: cancellationToken
         ) ?? new List<Product>();
 
-        // Find the product to update by ID
         var productsToUpdate = products.Where(p => p.ProductInfo.Code == command.Id).ToList();
         
         if (!productsToUpdate.Any())
@@ -41,7 +39,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
             throw new InvalidOperationException($"Product with ID '{command.Id}' not found.");
         }
 
-        // Validate brand
         var brands = await _daprClient.GetStateAsync<List<BrandMetaData>>(
             STORE_NAME, 
             BRANDS_KEY, 
@@ -53,7 +50,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
             throw new InvalidOperationException($"Brand with code '{command.BrandCode}' does not exist.");
         }
 
-        // Validate categories
         var categories = await _daprClient.GetStateAsync<List<CategoryMetaData>>(
             STORE_NAME, 
             CATEGORIES_KEY, 
@@ -68,7 +64,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
             }
         }
 
-        // Process gifts if specified
         List<Gift> updatedGifts = new List<Gift>();
         if (command.GiftCodes != null && command.GiftCodes.Any())
         {
@@ -90,7 +85,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
             }
         }
 
-        // Process any base64 images in variant groups
         if (command.Variants != null && command.Variants.Any())
         {
             foreach (var group in command.Variants)
@@ -101,23 +95,13 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                     {
                         var uploadedImages = new List<Image>();
                         
-                        // Keep existing images
-                        if (variant.Images != null)
-                        {
-                            uploadedImages.AddRange(variant.Images);
-                        }
-                        
-                        // Process and upload each base64 image
                         foreach (var imageBase64 in variant.ImagesBase64)
                         {
                             if (!string.IsNullOrEmpty(imageBase64.Base64Content))
                             {
                                 try
                                 {
-                                    // Upload to Cloudinary
                                     string imageUrl = await _cloudinaryService.UploadImageBase64Async(imageBase64.Base64Content);
-                                    
-                                    // Add to images list
                                     uploadedImages.Add(new Image
                                     {
                                         Url = imageUrl,
@@ -131,50 +115,41 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                             }
                         }
                         
-                        // Replace the images collection with our new one that includes uploaded images
                         variant.Images = uploadedImages;
                     }
                 }
             }
         }
 
-        // Update common properties for all product variants
         foreach (var product in productsToUpdate)
         {
-            // Update basic product info while preserving Id and Code
             product.ProductInfo.Name = command.Name;
             product.ProductInfo.ImageUrl = command.ImageUrl;
             product.ProductInfo.Status = command.Status;
             product.ProductInfo.Brand = command.BrandCode;
             product.ProductInfo.Category = command.CategoriesCode;
             
-            // Update gifts
             product.Gifts = updatedGifts;
             
-            // Update price if specified
             if (command.Price != null)
             {
                 product.Price.Update(command.Price);
             }
             
-            // Update short description
             if (!string.IsNullOrWhiteSpace(command.ShortDescription))
             {
                 product.ProductDetail.ShortDescription = command.ShortDescription;
             }
             
-            // Update metadata
             product.UpdatedBy = command.UpdatedBy;
             product.UpdatedDate = DateTime.Now;
         }
 
-        // Update variant-specific properties if needed
         if (command.Variants != null && command.Variants.Any())
         {
             UpdateProductVariants(productsToUpdate, command.Variants);
         }
 
-        // Save updated products back to state store
         await _daprClient.SaveStateAsync(
             STORE_NAME, 
             PRODUCTS_KEY, 
@@ -187,34 +162,26 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
     private void UpdateProductVariants(List<Product> products, List<VariantGroupUpdate> variantGroups)
     {
-        // For each product variant
         foreach (var product in products)
         {
-            // Get the product options
             foreach (var variantGroup in variantGroups)
             {
-                // Find the corresponding option group in the product
                 var productOptionGroup = product.ProductOptions.FirstOrDefault(po => 
                     po.Title.Equals(variantGroup.OptionTitle, StringComparison.OrdinalIgnoreCase));
                 
                 if (productOptionGroup != null)
                 {
-                    // For each option in the variant group
                     foreach (var variantOption in variantGroup.Options)
                     {
-                        // Find the corresponding option in the product
                         var productOption = productOptionGroup.Options.FirstOrDefault(po => 
                             po.Label.Equals(variantOption.OptionLabel, StringComparison.OrdinalIgnoreCase));
                         
                         if (productOption != null)
                         {
-                            // Update quantity
                             productOption.Quantity = variantOption.Quantity;
                             
-                            // If this is the selected option for this product, update price and details
                             if (productOption.Selected)
                             {
-                                // Update price if specified
                                 if (variantOption.OriginalPrice.HasValue || variantOption.CurrentPrice.HasValue)
                                 {
                                     var priceCommand = new UpdatePriceCommand
@@ -225,25 +192,21 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                                     product.Price.Update(priceCommand);
                                 }
                                 
-                                // Update barcode if specified
                                 if (variantOption.Barcode.HasValue)
                                 {
                                     product.ProductDetail.Barcode = variantOption.Barcode.Value;
                                 }
                                 
-                                // Update descriptions if specified
                                 if (variantOption.Descriptions != null && variantOption.Descriptions.Any())
                                 {
                                     product.ProductDetail.Description = variantOption.Descriptions;
                                 }
                                 
-                                // Update images if specified
                                 if (variantOption.Images != null && variantOption.Images.Any())
                                 {
                                     product.ProductDetail.Image = variantOption.Images;
                                 }
                                 
-                                // Update short description if specified
                                 if (!string.IsNullOrWhiteSpace(variantOption.ShortDescription))
                                 {
                                     product.ProductDetail.ShortDescription = variantOption.ShortDescription;

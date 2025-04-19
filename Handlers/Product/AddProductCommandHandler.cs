@@ -34,7 +34,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             throw new InvalidOperationException($"Product with code '{command.Code}' already exists.");
         }
         
-        // Checking brand
         var brands = await _daprClient.GetStateAsync<List<BrandMetaData>>(
             STORE_NAME, 
             BRANDS_KEY, 
@@ -46,7 +45,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             throw new InvalidOperationException($"Brand with code '{command.BrandCode}' does not exist.");
         }
 
-        // Checking categories
         var categories = await _daprClient.GetStateAsync<List<CategoryMetaData>>(
             STORE_NAME, 
             CATEGORIES_KEY, 
@@ -61,7 +59,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             }
         }
 
-        // Process gifts if specified
         if (command.GiftCodes != null && command.GiftCodes.Any())
         {
             var gifts = await _daprClient.GetStateAsync<List<GiftMetaData>>(
@@ -78,22 +75,18 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                     throw new InvalidOperationException($"Gift with code '{giftCode}' does not exist.");
                 }
                 
-                // Create a Gift object from the metadata and add it to the command's Gifts collection
                 command.Gifts.Add(new Gift(giftMetadata.Name, giftMetadata.Code, giftMetadata.Image));
             }
         }
 
-        // Process variants with new structure
         if (command.Variants != null && command.Variants.Any())
         {
-            // Ensure we have at least one variant group
             var firstGroup = command.Variants.FirstOrDefault();
             if (firstGroup == null || !firstGroup.Options.Any())
             {
                 throw new InvalidOperationException("At least one variant option is required.");
             }
             
-            // Process base64 images for each variant
             foreach (var group in command.Variants)
             {
                 foreach (var variant in group.Options)
@@ -102,23 +95,14 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                     {
                         var uploadedImages = new List<Image>();
                         
-                        // Keep existing images
-                        if (variant.Images != null)
-                        {
-                            uploadedImages.AddRange(variant.Images);
-                        }
-                        
-                        // Process and upload each base64 image
                         foreach (var imageBase64 in variant.ImagesBase64)
                         {
                             if (!string.IsNullOrEmpty(imageBase64.Base64Content))
                             {
                                 try
                                 {
-                                    // Upload to Cloudinary
                                     string imageUrl = await _cloudinaryService.UploadImageBase64Async(imageBase64.Base64Content);
                                     
-                                    // Add to images list
                                     uploadedImages.Add(new Image
                                     {
                                         Url = imageUrl,
@@ -132,29 +116,28 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                             }
                         }
                         
-                        // Replace the images collection with our new one that includes uploaded images
                         variant.Images = uploadedImages;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("All variants must include at least one base64 image.");
                     }
                 }
             }
             
-            // Generate IDs for each option in the first variant group
             var optionIdMap = new Dictionary<string, string>();
             foreach (var variant in firstGroup.Options)
             {
                 optionIdMap[variant.OptionLabel] = IdGenerator.GenerateId(20);
             }
             
-            // Create a product for each option in the first variant group
             foreach (var variant in firstGroup.Options)
             {
                 string productId = optionIdMap[variant.OptionLabel];
                 var productVariation = new Product(command, productId, variant);
                 
-                // Create product options for the current product
                 var productOptions = new List<ProductOption>();
                 
-                // Add options from the first group (main options)
                 var mainOptions = new List<Option>();
                 foreach (var optionLabel in optionIdMap.Keys)
                 {
@@ -169,7 +152,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                 }
                 productOptions.Add(new ProductOption(firstGroup.OptionTitle, mainOptions));
                 
-                // Add options from other variant groups
                 foreach (var group in command.Variants.Skip(1))
                 {
                     var options = new List<Option>();

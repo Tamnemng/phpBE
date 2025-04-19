@@ -6,7 +6,7 @@ public class AddProductCommand : IRequest<Unit>
 {
     public string Name { get; set; }
     public string Code { get; set; }
-    public string ImageUrl { get; set; }
+    public string ImageUrl { get; set; } // Will be populated from ImageBase64 after upload
     public IEnumerable<string> CategoriesCode { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ProductStatus Status { get; set; }
@@ -28,7 +28,7 @@ public class AddProductCommand : IRequest<Unit>
     {
         Name = dto.Name;
         Code = dto.Code;
-        ImageUrl = dto.ImageUrl; // This now might contain the Cloudinary URL
+        ImageUrl = ""; // Will be set after Cloudinary upload in handler
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
@@ -49,7 +49,7 @@ public class AddProductCommand : IRequest<Unit>
                 
                 foreach (var optionDto in variantGroup.Options)
                 {
-                    group.Options.Add(new ProductVariant
+                    var variant = new ProductVariant
                     {
                         OptionLabel = optionDto.OptionLabel,
                         Quantity = optionDto.Quantity,
@@ -57,9 +57,12 @@ public class AddProductCommand : IRequest<Unit>
                         CurrentPrice = optionDto.CurrentPrice,
                         Barcode = optionDto.Barcode,
                         Descriptions = optionDto.Descriptions ?? new List<Description>(),
-                        Images = optionDto.Images ?? new List<Image>(),
+                        Images = new List<Image>(), // Will be populated from ImagesBase64 after upload
+                        ImagesBase64 = optionDto.ImagesBase64,
                         ShortDescription = optionDto.ShortDescription
-                    });
+                    };
+                    
+                    group.Options.Add(variant);
                 }
                 
                 Variants.Add(group);
