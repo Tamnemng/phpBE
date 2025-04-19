@@ -4,16 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Think4.Services;
 
 [ApiController]
 [Route("api/brands")]
 public class BrandController : ControllerBase
 {
-    private readonly IMediator _mediator;
+     private readonly IMediator _mediator;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public BrandController(IMediator mediator)
+    public BrandController(IMediator mediator, ICloudinaryService cloudinaryService)
     {
         _mediator = mediator;
+        _cloudinaryService = cloudinaryService;
     }
 
     [HttpGet("get_select")]
@@ -45,7 +48,7 @@ public class BrandController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddBrand([FromBody] AddBrandCommand command)
+    public async Task<IActionResult> AddGift([FromBody] AddBrandDto giftDto)
     {
         if (!ModelState.IsValid)
         {
@@ -62,10 +65,24 @@ public class BrandController : ControllerBase
                 "VALIDATION_ERROR"
             ));
         }
+
         try
         {
+            string imageUrl = null;
+            if (!string.IsNullOrEmpty(giftDto.ImageBase64))
+            {
+                imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
+            }
+
+            var command = new AddBrandCommand(
+                giftDto.Code,
+                giftDto.Name,
+                imageUrl ?? "", // Use uploaded URL or empty string
+                giftDto.CreatedBy
+            );
+
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm thương hiệu thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm brand thành công!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -92,7 +109,7 @@ public class BrandController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateBrand([FromBody] UpdateBrandCommand command)
+    public async Task<IActionResult> UpdateGift([FromBody] UpdateBrandDto giftDto)
     {
         if (!ModelState.IsValid)
         {
@@ -109,14 +126,28 @@ public class BrandController : ControllerBase
                 "VALIDATION_ERROR"
             ));
         }
+        
         try
         {
+            string imageUrl = null;
+            if (!string.IsNullOrEmpty(giftDto.ImageBase64))
+            {
+                imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
+            }
+            
+            var command = new UpdateBrandCommand(
+                giftDto.Code,
+                giftDto.Name,
+                imageUrl ?? "",
+                giftDto.UpdatedBy
+            );
+            
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_UPDATE_ERROR"));
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "GIFT_UPDATE_ERROR"));
         }
         catch (Exception ex)
         {

@@ -26,7 +26,6 @@ public class AddBrandCommandHandler : IRequestHandler<AddBrandCommand, Unit>
             cancellationToken: cancellationToken
         ) ?? new List<BrandMetaData>();
 
-        // Check for duplicate brand code
         if (brandMetadataList.Any(bm => 
             string.Equals(bm.Code, command.Code, StringComparison.OrdinalIgnoreCase)))
         {
@@ -35,18 +34,15 @@ public class AddBrandCommandHandler : IRequestHandler<AddBrandCommand, Unit>
             );
         }
 
-        // Create brand metadata directly using command details
         var brandMetadata = new BrandMetaData(
             createdBy: command.CreatedBy, 
             code: command.Code, 
             name: command.Name, 
-            logo: command.Logo
+            image: command.Image
         );
 
-        // Add to collection
         brandMetadataList.Add(brandMetadata);
 
-        // Save brand metadata
         await _daprClient.SaveStateAsync(
             STORE_NAME, 
             BRAND_METADATA_KEY, 

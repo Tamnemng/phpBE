@@ -2,14 +2,14 @@ using MediatR;
 
 public class UpdateGiftCommand : IRequest<Unit>
 {
-    public string Code { get; set; }
+    public string Id { get; set; }
     public string Name { get; set; }
     public string Image { get; set; }
     public string UpdatedBy { get; set; }
 
-    public UpdateGiftCommand(string code, string name, string image, bool isSellable, string updatedBy)
+    public UpdateGiftCommand(string id, string name, string image, string updatedBy)
     {
-        Code = code;
+        Id = id;
         Name = name;
         Image = image;
         UpdatedBy = updatedBy;

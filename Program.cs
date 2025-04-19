@@ -2,6 +2,7 @@ using Dapr.Client;
 using Microsoft.OpenApi.Models;
 using MediatR;
 using System.Text.Json.Serialization;
+using Think4.Services;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -15,6 +16,9 @@ builder.Services.AddDaprClient(client =>
 {
     // Cấu hình Dapr
 });
+
+// thêm cloudinary
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 // Thêm MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));

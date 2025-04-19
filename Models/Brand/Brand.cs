@@ -5,22 +5,22 @@ public class Brand
     public string Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
-    public string Logo { get; set; }
+    public string Image { get; set; }
 
     public Brand()
     {
         Id = IdGenerator.GenerateId(16);
         Name = string.Empty;
         Code = string.Empty;
-        Logo = string.Empty;
+        Image = string.Empty;
     }
 
-    public Brand(string name, string code, string logo)
+    public Brand(string name, string code, string image)
     {
         Id = IdGenerator.GenerateId(16);
         Name = name;
         Code = code;
-        Logo = logo;
+        Image = image;
     }
 
     public Brand(AddBrandCommand command)
@@ -28,23 +28,23 @@ public class Brand
         Id = IdGenerator.GenerateId(16);
         Code = command.Code;
         Name = command.Name;
-        Logo = command.Logo;
+        Image = command.Image;
     }
 
-    public static Brand Create(string code, string name, string logo)
+    public static Brand Create(string code, string name, string image)
     {
         return new Brand
         {
             Code = code,
             Name = name,
-            Logo = logo,
+            Image = image,
         };
     }
 
     public void Update(UpdateBrandCommand command)
     {
         Name = command.Name;
-        Logo = command.Logo;
+        Image = command.Image;
     }
 }
 public class BrandMetaData : BaseEntity
@@ -52,24 +52,24 @@ public class BrandMetaData : BaseEntity
     public string Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
-    public string Logo { get; set; }
+    public string Image { get; set; }
 
     public BrandMetaData() : base()
     {
         Id = IdGenerator.GenerateId(16);
         Name = string.Empty;
         Code = string.Empty;
-        Logo = string.Empty;
+        Image = string.Empty;
     }
 
     // Constructor with creation details
-    public BrandMetaData(string createdBy, string code, string name, string logo)
+    public BrandMetaData(string createdBy, string code, string name, string image)
         : base(createdBy)
     {
         Id = IdGenerator.GenerateId(16);
         Name = name;
         Code = code;
-        Logo = logo;
+        Image = image;
     }
 
     public void Update(UpdateBrandCommand brandCommand, string updatedBy)
@@ -79,6 +79,6 @@ public class BrandMetaData : BaseEntity
         
         // Update only mutable properties
         Name = brandCommand.Name;
-        Logo = brandCommand.Logo;
+        Image = brandCommand.Image;
     }
 }

@@ -22,12 +22,12 @@ public class UpdateGiftCommandHandler : IRequestHandler<UpdateGiftCommand, Unit>
         ) ?? new List<GiftMetaData>();
 
         var giftToUpdate = giftMetadataList.FirstOrDefault(g => 
-            string.Equals(g.Code, command.Code, StringComparison.OrdinalIgnoreCase));
+            string.Equals(g.Id, command.Id, StringComparison.OrdinalIgnoreCase));
 
         if (giftToUpdate == null)
         {
             throw new InvalidOperationException(
-                $"A gift with code '{command.Code}' does not exist."
+                $"A gift with id '{command.Id}' does not exist."
             );
         }
 

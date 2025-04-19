@@ -4,16 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Think4.Services;
+using Microsoft.AspNetCore.Http;
 
 [ApiController]
 [Route("api/gifts")]
 public class GiftController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public GiftController(IMediator mediator)
+    public GiftController(IMediator mediator, ICloudinaryService cloudinaryService)
     {
         _mediator = mediator;
+        _cloudinaryService = cloudinaryService;
     }
 
     [HttpGet("get_select")]
@@ -45,7 +49,7 @@ public class GiftController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddBrand([FromBody] AddGiftCommand command)
+    public async Task<IActionResult> AddGift([FromBody] AddGiftDto giftDto)
     {
         if (!ModelState.IsValid)
         {
@@ -62,10 +66,26 @@ public class GiftController : ControllerBase
                 "VALIDATION_ERROR"
             ));
         }
+
         try
         {
+            // Upload image to Cloudinary if base64 is provided
+            string imageUrl = null;
+            if (!string.IsNullOrEmpty(giftDto.ImageBase64))
+            {
+                imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
+            }
+
+            // Create command with image URL from Cloudinary
+            var command = new AddGiftCommand(
+                giftDto.Code,
+                giftDto.Name,
+                imageUrl ?? "", // Use uploaded URL or empty string
+                giftDto.CreatedBy
+            );
+
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm thương quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm quà tặng thành công!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -76,6 +96,7 @@ public class GiftController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
+
 
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
@@ -92,7 +113,7 @@ public class GiftController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateBrand([FromBody] UpdateGiftCommand command)
+    public async Task<IActionResult> UpdateGift([FromBody] UpdateGiftDto giftDto)
     {
         if (!ModelState.IsValid)
         {
@@ -109,8 +130,23 @@ public class GiftController : ControllerBase
                 "VALIDATION_ERROR"
             ));
         }
+        
         try
         {
+            // Upload image to Cloudinary if base64 is provided
+            string imageUrl = null;
+            if (!string.IsNullOrEmpty(giftDto.ImageBase64))
+            {
+                imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
+            }
+            
+            var command = new UpdateGiftCommand(
+                giftDto.Code,
+                giftDto.Name,
+                imageUrl ?? "",
+                giftDto.UpdatedBy
+            );
+            
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
         }
