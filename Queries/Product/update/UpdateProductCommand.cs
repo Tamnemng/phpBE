@@ -27,7 +27,7 @@ public class UpdateProductCommand : IRequest<Unit>
     {
         Id = dto.Id;
         Name = dto.Name;
-        ImageUrl = dto.ImageUrl;
+        ImageUrl = dto.ImageUrl; // This now might contain the Cloudinary URL
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
@@ -82,5 +82,6 @@ public class ProductVariantUpdate
     public int? Barcode { get; set; }
     public IEnumerable<Description> Descriptions { get; set; }
     public IEnumerable<Image> Images { get; set; }
+    public IEnumerable<ImageBase64Dto> ImagesBase64 { get; set; }
     public string ShortDescription { get; set; }
 }

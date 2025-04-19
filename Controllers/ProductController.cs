@@ -7,16 +7,19 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMS.Core.Queries;
 using OMS.Core.Utilities;
+using Think4.Services;
 
 [ApiController]
 [Route("api/products")]
 public class ProductController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public ProductController(IMediator mediator)
+    public ProductController(IMediator mediator, ICloudinaryService cloudinaryService)
     {
         _mediator = mediator;
+        _cloudinaryService = cloudinaryService;
     }
 
     [HttpPost("add")]
@@ -49,6 +52,12 @@ public class ProductController : ControllerBase
                     HttpStatusCode.BadRequest,
                     "VALIDATION_ERROR"
                 ));
+            }
+
+            // Upload image to Cloudinary if base64 is provided
+            if (!string.IsNullOrEmpty(productDto.ImageBase64))
+            {
+                productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
             }
 
             // Convert from DTO to Command
@@ -109,6 +118,7 @@ public class ProductController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
+    
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> code)
     {
@@ -144,6 +154,12 @@ public class ProductController : ControllerBase
 
         try
         {
+            // Upload image to Cloudinary if base64 is provided
+            if (!string.IsNullOrEmpty(productDto.ImageBase64))
+            {
+                productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
+            }
+
             // Convert from DTO to Command
             var command = new UpdateProductCommand(productDto);
 

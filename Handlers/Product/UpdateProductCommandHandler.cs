@@ -6,19 +6,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using OMS.Core.Utilities;
+using Think4.Services;
 
 public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Unit>
 {
     private readonly DaprClient _daprClient;
+    private readonly ICloudinaryService _cloudinaryService;
     private const string STORE_NAME = "statestore";
     private const string PRODUCTS_KEY = "products";
     private const string BRANDS_KEY = "brands";
     private const string CATEGORIES_KEY = "categories";
     private const string GIFTS_KEY = "gifts";
 
-    public UpdateProductCommandHandler(DaprClient daprClient)
+    public UpdateProductCommandHandler(DaprClient daprClient, ICloudinaryService cloudinaryService)
     {
         _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+        _cloudinaryService = cloudinaryService ?? throw new ArgumentNullException(nameof(cloudinaryService));
     }
 
     public async Task<Unit> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
@@ -84,6 +87,54 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                 }
                 
                 updatedGifts.Add(new Gift(giftMetadata.Name, giftMetadata.Code, giftMetadata.Image));
+            }
+        }
+
+        // Process any base64 images in variant groups
+        if (command.Variants != null && command.Variants.Any())
+        {
+            foreach (var group in command.Variants)
+            {
+                foreach (var variant in group.Options)
+                {
+                    if (variant.ImagesBase64 != null && variant.ImagesBase64.Any())
+                    {
+                        var uploadedImages = new List<Image>();
+                        
+                        // Keep existing images
+                        if (variant.Images != null)
+                        {
+                            uploadedImages.AddRange(variant.Images);
+                        }
+                        
+                        // Process and upload each base64 image
+                        foreach (var imageBase64 in variant.ImagesBase64)
+                        {
+                            if (!string.IsNullOrEmpty(imageBase64.Base64Content))
+                            {
+                                try
+                                {
+                                    // Upload to Cloudinary
+                                    string imageUrl = await _cloudinaryService.UploadImageBase64Async(imageBase64.Base64Content);
+                                    
+                                    // Add to images list
+                                    uploadedImages.Add(new Image
+                                    {
+                                        Url = imageUrl,
+                                        piority = imageBase64.Priority
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new InvalidOperationException($"Failed to upload image: {ex.Message}");
+                                }
+                            }
+                        }
+                        
+                        // Replace the images collection with our new one that includes uploaded images
+                        variant.Images = uploadedImages;
+                    }
+                }
             }
         }
 

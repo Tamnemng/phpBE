@@ -28,7 +28,7 @@ public class AddProductCommand : IRequest<Unit>
     {
         Name = dto.Name;
         Code = dto.Code;
-        ImageUrl = dto.ImageUrl;
+        ImageUrl = dto.ImageUrl; // This now might contain the Cloudinary URL
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
@@ -83,5 +83,6 @@ public class ProductVariant
     public int Barcode { get; set; }
     public IEnumerable<Description> Descriptions { get; set; }
     public IEnumerable<Image> Images { get; set; }
+    public IEnumerable<ImageBase64Dto> ImagesBase64 { get; set; }
     public string ShortDescription { get; set; }
 }
