@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-public class AddBrandDto
+public class AddCategoryDto
 {
     [Required]
     public string Code { get; set; }
@@ -8,19 +8,13 @@ public class AddBrandDto
     [Required]
     public string Name { get; set; }
     
-    // For base64 encoded image upload
-    public string ImageBase64 { get; set; }
-    
 }
 
-public class UpdateBrandDto
+public class UpdateCategoryDto
 {
     [Required]
     public string Id { get; set; }
     
     [Required]
     public string Name { get; set; }
-    
-    // For base64 encoded image upload
-    public string ImageBase64 { get; set; }
 }

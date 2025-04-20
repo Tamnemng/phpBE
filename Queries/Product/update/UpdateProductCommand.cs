@@ -23,7 +23,7 @@ public class UpdateProductCommand : IRequest<Unit>
         CategoriesCode = new List<string>();
     }
 
-    public UpdateProductCommand(ProductUpdateDto dto)
+    public UpdateProductCommand(ProductUpdateDto dto, string username)
     {
         Id = dto.Id;
         Name = dto.Name;
@@ -31,7 +31,7 @@ public class UpdateProductCommand : IRequest<Unit>
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
-        UpdatedBy = dto.UpdatedBy;
+        UpdatedBy = username;
         Price = dto.Price;
         GiftCodes = dto.GiftCodes ?? new List<string>();
         ShortDescription = dto.ShortDescription;

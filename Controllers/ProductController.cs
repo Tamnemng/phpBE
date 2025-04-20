@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMS.Core.Queries;
 using OMS.Core.Utilities;
@@ -22,6 +23,7 @@ public class ProductController : ControllerBase
         _cloudinaryService = cloudinaryService;
     }
 
+    [Authorize(Roles = "Admin, Manager")]
     [HttpPost("add")]
     public async Task<IActionResult> AddProduct([FromBody] ProductCreateDto productDto)
     {
@@ -86,8 +88,9 @@ public class ProductController : ControllerBase
             }
 
             productDto.ImageBase64 = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
-            var command = new AddProductCommand(productDto);
+            var command = new AddProductCommand(productDto, username);
             
             command.ImageUrl = productDto.ImageBase64;
 
@@ -145,7 +148,7 @@ public class ProductController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
-    
+    [Authorize(Roles = "Admin, Manager")]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> code)
     {
@@ -159,7 +162,7 @@ public class ProductController : ControllerBase
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_DELETE_ERROR"));
         }
     }
-
+    [Authorize(Roles = "Admin, Manager")]
     [HttpPut("update")]
     public async Task<IActionResult> UpdateProduct([FromBody] ProductUpdateDto productDto)
     {
@@ -185,8 +188,9 @@ public class ProductController : ControllerBase
             {
                 productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
             }
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
-            var command = new UpdateProductCommand(productDto);
+            var command = new UpdateProductCommand(productDto, username);
 
             await _mediator.Send(command);
 

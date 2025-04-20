@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -44,8 +45,9 @@ public class CategoryController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Manager, Admin")]
     [HttpPost("add")]
-    public async Task<IActionResult> AddCategory([FromBody] AddCategoryCommand command)
+    public async Task<IActionResult> AddCategory([FromBody] AddCategoryDto cateDto)
     {
         if (!ModelState.IsValid)
         {
@@ -64,6 +66,12 @@ public class CategoryController : ControllerBase
         }
         try
         {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new AddCategoryCommand(
+               cateDto.Code,
+               cateDto.Name,
+               username
+           );
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm danh mục thành công!"));
         }
@@ -76,7 +84,7 @@ public class CategoryController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
-
+    [Authorize(Roles = "Manager, Admin")]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteCategory(IEnumerable<string> id)
     {
@@ -91,8 +99,9 @@ public class CategoryController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Manager, Admin")]
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryCommand command)
+    public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryDto cateDto)
     {
         if (!ModelState.IsValid)
         {
@@ -111,6 +120,12 @@ public class CategoryController : ControllerBase
         }
         try
         {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateCategoryCommand(
+               cateDto.Id,
+               cateDto.Name,
+               username
+           );
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật danh mục thành công!"));
         }

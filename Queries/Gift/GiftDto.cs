@@ -10,8 +10,6 @@ public class AddGiftDto
     
     // For base64 encoded image upload
     public string ImageBase64 { get; set; }
-    
-    public string CreatedBy { get; set; }
 }
 
 public class UpdateGiftDto
@@ -24,6 +22,4 @@ public class UpdateGiftDto
     
     // For base64 encoded image upload
     public string ImageBase64 { get; set; }
-    
-    public string UpdatedBy { get; set; }
 }

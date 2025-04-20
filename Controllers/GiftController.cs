@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Think4.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/gifts")]
@@ -48,6 +49,7 @@ public class GiftController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin, Manager")]
     [HttpPost("add")]
     public async Task<IActionResult> AddGift([FromBody] AddGiftDto giftDto)
     {
@@ -75,13 +77,14 @@ public class GiftController : ControllerBase
             {
                 imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
             }
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             // Create command with image URL from Cloudinary
             var command = new AddGiftCommand(
                 giftDto.Code,
                 giftDto.Name,
                 imageUrl ?? "", // Use uploaded URL or empty string
-                giftDto.CreatedBy
+                username
             );
 
             await _mediator.Send(command);
@@ -97,7 +100,7 @@ public class GiftController : ControllerBase
         }
     }
 
-
+    [Authorize(Roles = "Admin, Manager")]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
     {
@@ -112,6 +115,7 @@ public class GiftController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin, Manager")]
     [HttpPut("update")]
     public async Task<IActionResult> UpdateGift([FromBody] UpdateGiftDto giftDto)
     {
@@ -139,12 +143,13 @@ public class GiftController : ControllerBase
             {
                 imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
             }
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             
             var command = new UpdateGiftCommand(
                 giftDto.Code,
                 giftDto.Name,
                 imageUrl ?? "",
-                giftDto.UpdatedBy
+                username
             );
             
             await _mediator.Send(command);

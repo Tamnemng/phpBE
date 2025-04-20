@@ -24,7 +24,7 @@ public class AddProductCommand : IRequest<Unit>
         GiftCodes = new List<string>();
     }
 
-    public AddProductCommand(ProductCreateDto dto)
+    public AddProductCommand(ProductCreateDto dto, string username)
     {
         Name = dto.Name;
         Code = dto.Code;
@@ -32,7 +32,7 @@ public class AddProductCommand : IRequest<Unit>
         CategoriesCode = dto.CategoriesCode ?? new List<string>();
         BrandCode = dto.BrandCode;
         Status = dto.Status;
-        CreatedBy = dto.CreatedBy;
+        CreatedBy = username;
         GiftCodes = dto.GiftCodes ?? new List<string>();
         Gifts = new List<Gift>();
         Variants = new List<VariantGroup>();

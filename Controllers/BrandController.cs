@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ public class BrandController : ControllerBase
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_GET_ERROR"));
         }
     }
-
+    [Authorize(Roles = "Manager, Admin")]
     [HttpPost("add")]
     public async Task<IActionResult> AddGift([FromBody] AddBrandDto giftDto)
     {
@@ -68,6 +69,7 @@ public class BrandController : ControllerBase
 
         try
         {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             string imageUrl = null;
             if (!string.IsNullOrEmpty(giftDto.ImageBase64))
             {
@@ -78,7 +80,7 @@ public class BrandController : ControllerBase
                 giftDto.Code,
                 giftDto.Name,
                 imageUrl ?? "", // Use uploaded URL or empty string
-                giftDto.CreatedBy
+                username
             );
 
             await _mediator.Send(command);
@@ -94,6 +96,7 @@ public class BrandController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Manager, Admin")]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBrand(IEnumerable<string> id)
     {
@@ -108,6 +111,7 @@ public class BrandController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Manager, Admin")]
     [HttpPut("update")]
     public async Task<IActionResult> UpdateGift([FromBody] UpdateBrandDto giftDto)
     {
@@ -129,6 +133,7 @@ public class BrandController : ControllerBase
         
         try
         {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             string imageUrl = null;
             if (!string.IsNullOrEmpty(giftDto.ImageBase64))
             {
@@ -136,10 +141,10 @@ public class BrandController : ControllerBase
             }
             
             var command = new UpdateBrandCommand(
-                giftDto.Code,
+                giftDto.Id,
                 giftDto.Name,
                 imageUrl ?? "",
-                giftDto.UpdatedBy
+                username
             );
             
             await _mediator.Send(command);

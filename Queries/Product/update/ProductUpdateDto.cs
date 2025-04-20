@@ -24,8 +24,6 @@ public class ProductUpdateDto
     [Required]
     public string BrandCode { get; set; }
     
-    public string UpdatedBy { get; set; }
-    
     public UpdatePriceCommand Price { get; set; }
     
     public List<VariantGroupUpdateDto> Variants { get; set; }

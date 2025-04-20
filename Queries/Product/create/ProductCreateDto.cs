@@ -23,8 +23,6 @@ public class ProductCreateDto
     [Required]
     public string BrandCode { get; set; }
     
-    public string CreatedBy { get; set; }
-    
     [Required]
     public List<VariantGroupDto> Variants { get; set; }
 
