@@ -34,7 +34,6 @@ namespace Think4.Services
         private const string STORE_NAME = "statestore";
         private const string USERS_KEY = "users";
         private static readonly TimeSpan SessionTimeout = TimeSpan.FromHours(1);
-        private const string MANAGER_SECRET_KEY = "Think4ManagerSecretKey2025"; // This should be in config
 
         public AuthService(IConfiguration configuration, DaprClient daprClient)
         {
