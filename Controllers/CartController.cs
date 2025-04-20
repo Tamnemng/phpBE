@@ -7,7 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 
 [ApiController]
-[Route("api/Carts")]
+[Route("api/carts")]
 public class CartController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -16,9 +16,9 @@ public class CartController : ControllerBase
     {
         _mediator = mediator;
     }
-
+    [Authorize]
     [HttpPost("add")]
-    public async Task<IActionResult> AddToCart([FromBody] AddToCartCommand command)
+    public async Task<IActionResult> AddToCart([FromBody] AddCartDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -37,6 +37,13 @@ public class CartController : ControllerBase
         }
         try
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var command = new AddToCartCommand(
+               userId,
+               dto.ItemId,
+               dto.ItemType,
+               dto.Quantity
+           );
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm vào giỏ hàng thành công!"));
         }
@@ -50,6 +57,7 @@ public class CartController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpGet("get/{userId}")]
     public async Task<IActionResult> GetCart(string userId)
     {
@@ -64,6 +72,7 @@ public class CartController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteFromCart([FromBody] DeleteFromCartCommand command)
     {
@@ -97,8 +106,9 @@ public class CartController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateCart([FromBody] UpdateCartCommand command)
+    public async Task<IActionResult> UpdateCart([FromBody] UpdateCartDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -117,6 +127,15 @@ public class CartController : ControllerBase
         }
         try
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var command = new UpdateCartCommand(
+               userId,
+               dto.OldItemId,
+               dto.OldItemType,
+               dto.NewItemId,
+               dto.NewItemType,
+               dto.Quantity
+           );
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật giỏ hàng thành công!"));
         }
@@ -129,5 +148,4 @@ public class CartController : ControllerBase
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
         }
     }
-
 }

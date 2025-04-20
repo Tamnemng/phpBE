@@ -1,5 +1,10 @@
 using MediatR;
 using Dapr.Client;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
 
 public class DeleteFromCartHandler : IRequestHandler<DeleteFromCartCommand, Unit>
 {
@@ -15,6 +20,12 @@ public class DeleteFromCartHandler : IRequestHandler<DeleteFromCartCommand, Unit
     public async Task<Unit> Handle(DeleteFromCartCommand command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
+        
+        if (command.Items == null || !command.Items.Any())
+        {
+            throw new InvalidOperationException("No items specified for deletion.");
+        }
+        
         var cartList = await _daprClient.GetStateAsync<List<Cart>>(
             STORE_NAME,
             CART_METADATA_KEY,
@@ -27,9 +38,9 @@ public class DeleteFromCartHandler : IRequestHandler<DeleteFromCartCommand, Unit
             throw new InvalidOperationException("Giỏ hàng không tồn tại!");
         }
 
-        foreach (var productId in command.ProductIds)
+        foreach (var item in command.Items)
         {
-            existingCart.RemoveItem(productId);
+            existingCart.RemoveItem(item.ItemId, item.ItemType);
         }
 
         await _daprClient.SaveStateAsync(

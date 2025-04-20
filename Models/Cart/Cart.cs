@@ -1,6 +1,12 @@
 using OMS.Core.Utilities;
 using System.Collections.Generic;
 
+public enum CartItemType
+{
+    Product,
+    Combo
+}
+
 public class Cart
 {
     public string UserId { get; set; }
@@ -17,14 +23,14 @@ public class Cart
         Items.Add(item);
     }
 
-    public void RemoveItem(string productId)
+    public void RemoveItem(string itemId, CartItemType itemType)
     {
-        Items.RemoveAll(i => i.ProductId == productId);
+        Items.RemoveAll(i => i.ItemId == itemId && i.ItemType == itemType);
     }
 
-    public void UpdateItemQuantity(string productId, int quantity)
+    public void UpdateItemQuantity(string itemId, CartItemType itemType, int quantity)
     {
-        var item = Items.Find(i => i.ProductId == productId);
+        var item = Items.Find(i => i.ItemId == itemId && i.ItemType == itemType);
         if (item != null && quantity > 0)
         {
             item.Quantity = quantity;
@@ -34,11 +40,14 @@ public class Cart
 
 public class CartItem
 {
-    public string ProductId { get; set; }
+    public string ItemId { get; set; } // Product ID or Combo ID
+    public CartItemType ItemType { get; set; }
     public int Quantity { get; set; }
-    public CartItem(string productId, int quantity)
+    
+    public CartItem(string itemId, CartItemType itemType, int quantity)
     {
-        ProductId = productId;
+        ItemId = itemId;
+        ItemType = itemType;
         Quantity = quantity;
     }
 }
