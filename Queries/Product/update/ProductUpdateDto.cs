@@ -29,8 +29,6 @@ public class ProductUpdateDto
     public List<VariantGroupUpdateDto> Variants { get; set; }
 
     public List<string> GiftCodes { get; set; } = new List<string>();
-    
-    public string ShortDescription { get; set; }
 }
 
 public class VariantGroupUpdateDto

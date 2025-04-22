@@ -34,7 +34,6 @@ public class UpdateProductCommand : IRequest<Unit>
         UpdatedBy = username;
         Price = dto.Price;
         GiftCodes = dto.GiftCodes ?? new List<string>();
-        ShortDescription = dto.ShortDescription;
         
         if (dto.Variants != null)
         {

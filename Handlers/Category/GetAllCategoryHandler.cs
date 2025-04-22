@@ -28,7 +28,7 @@ public class GetAllCategoryNamesQueryHandler : IRequestHandler<GetAllCategoryNam
 {
     private readonly DaprClient _daprClient;
     private const string STORE_NAME = "statestore";
-    private const string GIFT_METADATA_KEY = "brands";
+    private const string GIFT_METADATA_KEY = "categories";
 
     public GetAllCategoryNamesQueryHandler(DaprClient daprClient)
     {
