@@ -47,22 +47,22 @@ public class Description
 {
     public string Name { get; set; }
     public string DescriptionText { get; set; }
-    public int Piority { get; set; }
+    public int Priority { get; set; }
     public Description()
     {
         Name = string.Empty;
         DescriptionText = string.Empty;
-        Piority = 0;
+        Priority = 0;
     }
-    public Description(string name, string descriptionText, int piority)
+    public Description(string name, string descriptionText, int priority)
     {
         Name = name;
         DescriptionText = descriptionText;
-        Piority = piority;
+        Priority = priority;
     }
     public override string ToString()
     {
-        return $"Name: {Name}, DescriptionText: {DescriptionText}, Piority: {Piority}";
+        return $"Name: {Name}, DescriptionText: {DescriptionText}, Piority: {Priority}";
     }
 }
 public class ProductDetail
