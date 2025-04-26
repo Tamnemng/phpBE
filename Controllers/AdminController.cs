@@ -74,7 +74,7 @@ public class AdminController : ControllerBase
     // For admin to create a manager account directly
     [Authorize(Roles = "Admin")]
     [HttpPost("create-manager")]
-    public async Task<IActionResult> CreateManager([FromBody] UserRegisterDto registerDto)
+    public async Task<IActionResult> CreateManager([FromBody] ManagerRegisterDto registerDto)
     {
         if (!ModelState.IsValid)
         {
@@ -97,7 +97,7 @@ public class AdminController : ControllerBase
             // Force role to Manager
             // registerDto.Role = UserRole.Manager;
             
-            var user = await _authService.Register(registerDto);
+            var user = await _authService.RegisterManager(registerDto);
             
             var userDto = new UserDto(user);
             
