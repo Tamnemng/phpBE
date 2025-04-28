@@ -7,6 +7,6 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: 192.168.100.13:16379
+    value: 192.168.100.14:16379
   - name: redisPassword
     value: "ThInK4!*!!"

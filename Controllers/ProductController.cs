@@ -205,4 +205,33 @@ public class ProductController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
+
+    [HttpGet("related")]
+    public async Task<IActionResult> GetRelatedProducts([FromQuery] string productCode, [FromQuery] int count = 5)
+    {
+        if (string.IsNullOrEmpty(productCode))
+        {
+            return BadRequest(ApiResponse<object>.CreateError(
+                "Product code is required",
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var query = new GetRelatedProductsQuery(productCode, count);
+            var relatedProducts = await _mediator.Send(query);
+
+            return Ok(ApiResponse<List<ProductSummaryDto>>.CreateSuccess(relatedProducts, "Lấy danh sách sản phẩm liên quan thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.NotFound, "PRODUCT_NOT_FOUND"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
 }
