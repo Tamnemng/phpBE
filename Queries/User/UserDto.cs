@@ -70,3 +70,15 @@ public class LoginResponseDto
     public UserDto User { get; set; }
     public DateTime Expiration { get; set; }
 }
+
+public class DeleteUserDto
+{
+    [Required]
+    public string UserId { get; set; }
+}
+
+public class DeleteUsersDto
+{
+    [Required]
+    public List<string> UserIds { get; set; }
+}

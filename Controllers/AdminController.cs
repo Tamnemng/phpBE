@@ -7,6 +7,7 @@ using Think4.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Dapr.Client;
+using MediatR;
 
 [ApiController]
 [Route("api/admin")]
@@ -15,13 +16,15 @@ public class AdminController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly DaprClient _daprClient;
+    private readonly IMediator _mediator;
     private const string STORE_NAME = "statestore";
     private const string USERS_KEY = "users";
 
-    public AdminController(IAuthService authService, DaprClient daprClient)
+    public AdminController(IAuthService authService, DaprClient daprClient, IMediator mediator)
     {
         _authService = authService;
         _daprClient = daprClient;
+        _mediator = mediator; // Khởi tạo _mediator
     }
 
     [Authorize(Roles = "Admin")]
@@ -37,7 +40,7 @@ public class AdminController : ControllerBase
             ) ?? new List<User>();
 
             var userDtos = users.Select(u => new UserDto(u)).ToList();
-            
+
             return Ok(ApiResponse<List<UserDto>>.CreateSuccess(userDtos, "Lấy danh sách người dùng thành công!"));
         }
         catch (Exception ex)
@@ -96,16 +99,72 @@ public class AdminController : ControllerBase
         {
             // Force role to Manager
             // registerDto.Role = UserRole.Manager;
-            
+
             var user = await _authService.RegisterManager(registerDto);
-            
+
             var userDto = new UserDto(user);
-            
+
             return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Tạo tài khoản quản lý thành công!"));
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "REGISTER_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("users/delete-multiple")]
+    public async Task<IActionResult> DeleteMultipleUsers([FromBody] DeleteUsersDto deleteDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+
+            var command = new DeleteUsersCommand(deleteDto.UserIds, username);
+            var result = await _mediator.Send(command);
+
+            // Build response based on success and failures
+            var responseData = new
+            {
+                SuccessCount = result.SuccessCount,
+                FailedIds = result.FailedIds,
+                FailureReasons = result.FailureReasons
+            };
+
+            string message = result.SuccessCount > 0
+                ? $"Đã xóa thành công {result.SuccessCount} người dùng"
+                : "Không có người dùng nào được xóa";
+
+            if (result.FailedIds.Any())
+            {
+                message += $". {result.FailedIds.Count} người dùng không thể xóa.";
+            }
+
+            return Ok(ApiResponse<object>.CreateSuccess(responseData, message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "DELETE_ERROR"));
         }
         catch (Exception ex)
         {

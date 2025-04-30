@@ -24,6 +24,8 @@ namespace Think4.Services
         Task UpdateUserLastActive(string userId);
         string GenerateJwtToken(User user);
         Task<bool> IsSessionActive(string userId);
+        Task<bool> DeleteUser(string userId);
+        Task<(int SuccessCount, List<string> FailedIds)> DeleteUsers(List<string> userIds);
         Task LogoutUser(string userId);
     }
 
@@ -47,7 +49,7 @@ namespace Think4.Services
                 return null;
 
             var user = await GetUserByUsername(username);
-            
+
             // If no user found or password doesn't match
             if (user == null || !VerifyPasswordHash(password, user.Password))
                 return null;
@@ -55,7 +57,7 @@ namespace Think4.Services
             // Update last active time
             user.UpdateLastActive();
             await SaveUser(user);
-            
+
             return user;
         }
 
@@ -65,7 +67,7 @@ namespace Think4.Services
                 throw new InvalidOperationException($"Username '{userDto.Username}' is already taken");
 
             var users = await GetAllUsers();
-            
+
             // Create new user
             var user = new User(
                 userDto.Username,
@@ -76,20 +78,20 @@ namespace Think4.Services
             );
 
             users.Add(user);
-            
+
             await _daprClient.SaveStateAsync(STORE_NAME, USERS_KEY, users);
-            
+
             return user;
         }
-        
+
         public async Task<User> RegisterManager(ManagerRegisterDto managerDto)
         {
-        
+
             if (await GetUserByUsername(managerDto.Username) != null)
                 throw new InvalidOperationException($"Username '{managerDto.Username}' is already taken");
 
             var users = await GetAllUsers();
-            
+
             // Create new manager user
             var user = new User(
                 managerDto.Username,
@@ -100,9 +102,9 @@ namespace Think4.Services
             );
 
             users.Add(user);
-            
+
             await _daprClient.SaveStateAsync(STORE_NAME, USERS_KEY, users);
-            
+
             return user;
         }
 
@@ -127,16 +129,16 @@ namespace Think4.Services
                 await SaveUser(user);
             }
         }
-        
+
         public async Task<bool> IsSessionActive(string userId)
         {
             var user = await GetUserById(userId);
             if (user == null)
                 return false;
-                
+
             return !user.IsSessionExpired(SessionTimeout);
         }
-        
+
         public async Task LogoutUser(string userId)
         {
             var user = await GetUserById(userId);
@@ -152,7 +154,7 @@ namespace Think4.Services
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"] ?? "YourVeryLongSecretKeyHereForThink4ApiSecurity123!");
-            
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -160,14 +162,14 @@ namespace Think4.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
-            
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddDays(7), // Token valid for 7 days
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-            
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
@@ -175,16 +177,16 @@ namespace Think4.Services
         private async Task<List<User>> GetAllUsers()
         {
             return await _daprClient.GetStateAsync<List<User>>(
-                STORE_NAME, 
-                USERS_KEY, 
+                STORE_NAME,
+                USERS_KEY,
                 consistencyMode: ConsistencyMode.Strong
             ) ?? new List<User>();
         }
-        
+
         private async Task SaveUser(User user)
         {
             var users = await GetAllUsers();
-            
+
             var existingUserIndex = users.FindIndex(u => u.Id == user.Id);
             if (existingUserIndex >= 0)
             {
@@ -194,10 +196,10 @@ namespace Think4.Services
             {
                 users.Add(user);
             }
-            
+
             await _daprClient.SaveStateAsync(STORE_NAME, USERS_KEY, users);
         }
-        
+
         private string HashPassword(string password)
         {
             // In a real application, you would use a proper password hashing algorithm
@@ -206,12 +208,53 @@ namespace Think4.Services
             var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(hashedBytes);
         }
-        
+
         private bool VerifyPasswordHash(string password, string storedHash)
         {
             // Simple comparison for our example
             var passwordHash = HashPassword(password);
             return passwordHash == storedHash;
+        }
+
+        public async Task<bool> DeleteUser(string userId)
+        {
+            var users = await GetAllUsers();
+
+            int initialCount = users.Count;
+            users.RemoveAll(u => u.Id == userId);
+
+            if (users.Count == initialCount)
+                return false;
+
+            await _daprClient.SaveStateAsync(STORE_NAME, USERS_KEY, users);
+            return true;
+        }
+
+        public async Task<(int SuccessCount, List<string> FailedIds)> DeleteUsers(List<string> userIds)
+        {
+            var users = await GetAllUsers();
+            var failedIds = new List<string>();
+
+            // Check which users don't exist
+            foreach (var id in userIds)
+            {
+                if (!users.Any(u => u.Id == id))
+                {
+                    failedIds.Add(id);
+                }
+            }
+
+            // Get the valid IDs to delete
+            var validIdsToDelete = userIds.Except(failedIds).ToList();
+
+            int initialCount = users.Count;
+            users.RemoveAll(u => validIdsToDelete.Contains(u.Id));
+
+            int successCount = initialCount - users.Count;
+
+            await _daprClient.SaveStateAsync(STORE_NAME, USERS_KEY, users);
+
+            return (successCount, failedIds);
         }
     }
 }

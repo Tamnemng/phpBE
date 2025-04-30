@@ -11,11 +11,13 @@ public class BrandNameCodeDto
 {
     public string Code { get; set; }
     public string Name { get; set; }
+    public string ImageUrl { get; set; } // Optional, if you want to include image URL
 
-    public BrandNameCodeDto(string code, string name)
+    public BrandNameCodeDto(string code, string name, string imageUrl = null)
     {
         Code = code;
         Name = name;
+        ImageUrl = imageUrl;
     }
 }
 public class GetAllBrandNamesQuery : IRequest<List<BrandNameCodeDto>>
@@ -45,7 +47,7 @@ public class GetAllBrandNamesQueryHandler : IRequestHandler<GetAllBrandNamesQuer
 
         // Only map the Name and Code properties to the DTO
         var giftNamesAndCodes = giftMetadataList
-            .Select(gm => new BrandNameCodeDto(gm.Code, gm.Name))
+            .Select(gm => new BrandNameCodeDto(gm.Code, gm.Name, gm.Image))
             .ToList();
 
         return giftNamesAndCodes;

@@ -45,7 +45,7 @@ public class ProductController : ControllerBase
 
         try
         {
-            if (productDto.Variants == null || !productDto.Variants.Any() || 
+            if (productDto.Variants == null || !productDto.Variants.Any() ||
                 productDto.Variants.Any(v => v.Options == null || !v.Options.Any()))
             {
                 return BadRequest(ApiResponse<object>.CreateError(
@@ -91,7 +91,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             var command = new AddProductCommand(productDto, username);
-            
+
             command.ImageUrl = productDto.ImageBase64;
 
             await _mediator.Send(command);
@@ -224,6 +224,27 @@ public class ProductController : ControllerBase
             var relatedProducts = await _mediator.Send(query);
 
             return Ok(ApiResponse<List<ProductSummaryDto>>.CreateSuccess(relatedProducts, "Lấy danh sách sản phẩm liên quan thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.NotFound, "PRODUCT_NOT_FOUND"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpGet("{code}/variants")]
+    public async Task<IActionResult> GetProductVariants(string code)
+    {
+        try
+        {
+            // Tạo query để lấy tất cả sản phẩm có cùng mã code
+            var query = new GetProductVariantsQuery(code);
+            var variants = await _mediator.Send(query);
+
+            return Ok(ApiResponse<ProductVariantsDto>.CreateSuccess(variants, "Lấy biến thể sản phẩm thành công!"));
         }
         catch (InvalidOperationException ex)
         {
