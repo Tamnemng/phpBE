@@ -79,8 +79,7 @@ public class GetProductVariantsHandler : IRequestHandler<GetProductVariantsQuery
                 Price = product.Price.CurrentPrice,
                 OriginalPrice = product.Price.OriginalPrice,
                 Quantity = product.ProductOptions.SelectMany(o => o.Options)
-                                     .Where(o => o.Selected)
-                                     .Sum(o => o.Quantity)
+                                     .Count(o => o.Selected)
             };
 
             // Collect all selected options

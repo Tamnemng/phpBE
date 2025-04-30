@@ -67,20 +67,17 @@ public class Description
 }
 public class ProductDetail
 {
-    public int Barcode { get; set; }
     public IEnumerable<Description> Description { get; set; }
     public IEnumerable<Image> Image { get; set; }
     public string ShortDescription { get; set; }
     public ProductDetail()
     {
-        Barcode = 0;
         Description = new List<Description>();
         Image = new List<Image>();
         ShortDescription = string.Empty;
     }
-    public ProductDetail(int barcode, IEnumerable<Description> description, IEnumerable<Image> image, string shortDescription)
+    public ProductDetail(IEnumerable<Description> description, IEnumerable<Image> image, string shortDescription)
     {
-        Barcode = barcode;
         Description = description;
         Image = image;
         ShortDescription = shortDescription;

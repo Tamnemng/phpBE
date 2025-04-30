@@ -153,8 +153,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                     bool isSelected = variant.OptionLabel == selectedOptionLabel;
                     options.Add(new Option(
                         variant.OptionLabel,
-                        IdGenerator.GenerateId(20),
-                        variant.Quantity,
                         isSelected
                     ));
                 }
@@ -174,7 +172,6 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
                 {
                     // Use the first group's selected variant for main product details
                     productVariation.ProductDetail = new ProductDetail(
-                        selectedVariant.Barcode,
                         selectedVariant.Descriptions,
                         selectedVariant.Images,
                         selectedVariant.ShortDescription

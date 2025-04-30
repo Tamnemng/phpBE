@@ -43,15 +43,11 @@ public class ProductVariantDto
     [Required]
     public string OptionLabel { get; set; } // Example: "Red"
     
-    public int Quantity { get; set; } = 0;
-    
     [Required]
     public decimal OriginalPrice { get; set; }
     
     [Required]
     public decimal CurrentPrice { get; set; }
-    
-    public int Barcode { get; set; }
     
     public IEnumerable<Description> Descriptions { get; set; }
     

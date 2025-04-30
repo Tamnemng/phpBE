@@ -28,7 +28,6 @@ public class Product : BaseEntity
         Gifts = command.Gifts;
         Price = Price.Create(variant.OriginalPrice, variant.CurrentPrice);
         ProductDetail = new ProductDetail(
-            variant.Barcode,
             variant.Descriptions,
             variant.Images,
             variant.ShortDescription

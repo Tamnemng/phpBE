@@ -45,13 +45,9 @@ public class ProductVariantUpdateDto
     [Required]
     public string OptionLabel { get; set; }
     
-    public int Quantity { get; set; }
-    
     public decimal? OriginalPrice { get; set; }
     
     public decimal? CurrentPrice { get; set; }
-    
-    public int? Barcode { get; set; }
     
     public IEnumerable<Description> Descriptions { get; set; }
     

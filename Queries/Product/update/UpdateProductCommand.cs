@@ -50,10 +50,8 @@ public class UpdateProductCommand : IRequest<Unit>
                     group.Options.Add(new ProductVariantUpdate
                     {
                         OptionLabel = optionDto.OptionLabel,
-                        Quantity = optionDto.Quantity,
                         OriginalPrice = optionDto.OriginalPrice,
                         CurrentPrice = optionDto.CurrentPrice,
-                        Barcode = optionDto.Barcode,
                         Descriptions = optionDto.Descriptions,
                         Images = null, // Will be populated from ImagesBase64 after upload
                         ImagesBase64 = optionDto.ImagesBase64,

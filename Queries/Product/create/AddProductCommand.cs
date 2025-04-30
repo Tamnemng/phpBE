@@ -52,10 +52,8 @@ public class AddProductCommand : IRequest<Unit>
                     var variant = new ProductVariant
                     {
                         OptionLabel = optionDto.OptionLabel,
-                        Quantity = optionDto.Quantity,
                         OriginalPrice = optionDto.OriginalPrice,
                         CurrentPrice = optionDto.CurrentPrice,
-                        Barcode = optionDto.Barcode,
                         Descriptions = optionDto.Descriptions ?? new List<Description>(),
                         Images = new List<Image>(), // Will be populated from ImagesBase64 after upload
                         ImagesBase64 = optionDto.ImagesBase64,
@@ -80,10 +78,8 @@ public class VariantGroup
 public class ProductVariant
 {
     public string OptionLabel { get; set; }
-    public int Quantity { get; set; }
     public decimal OriginalPrice { get; set; }
     public decimal CurrentPrice { get; set; }
-    public int Barcode { get; set; }
     public IEnumerable<Description> Descriptions { get; set; }
     public IEnumerable<Image> Images { get; set; }
     public IEnumerable<ImageBase64Dto> ImagesBase64 { get; set; }

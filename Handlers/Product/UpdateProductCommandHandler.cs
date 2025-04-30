@@ -178,8 +178,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                         
                         if (productOption != null)
                         {
-                            productOption.Quantity = variantOption.Quantity;
-                            
                             if (productOption.Selected)
                             {
                                 if (variantOption.OriginalPrice.HasValue || variantOption.CurrentPrice.HasValue)
@@ -190,11 +188,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                                         DiscountPrice = variantOption.CurrentPrice
                                     };
                                     product.Price.Update(priceCommand);
-                                }
-                                
-                                if (variantOption.Barcode.HasValue)
-                                {
-                                    product.ProductDetail.Barcode = variantOption.Barcode.Value;
                                 }
                                 
                                 if (variantOption.Descriptions != null && variantOption.Descriptions.Any())
