@@ -113,7 +113,7 @@ public class ProductController : ControllerBase
 
     private bool IsImageRequiringVariant(string variantTitle)
     {
-        
+
         string title = variantTitle.ToLowerInvariant();
         return title.Contains("color") || title.Contains("Color") || title.Contains("Màu") || title.Contains("màu") || title.Contains("colour") || title.Contains("Colour");
     }
@@ -196,8 +196,8 @@ public class ProductController : ControllerBase
         {
             if (!string.IsNullOrEmpty(productDto.ImageBase64))
             {
-                productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
-            }
+                        productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
+                    }
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             var command = new UpdateProductCommand(productDto, username);
@@ -263,6 +263,28 @@ public class ProductController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpGet("getUpdateTemplate/{code}")]
+    [ProducesResponseType(typeof(ProductCreateDto), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> GetProductTemplate(string code)
+    {
+        try
+        {
+            var query = new GetProductTemplateQuery(code);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"An error occurred: {ex.Message}" });
         }
     }
 }
