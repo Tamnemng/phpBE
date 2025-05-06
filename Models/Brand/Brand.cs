@@ -74,11 +74,15 @@ public class BrandMetaData : BaseEntity
 
     public void Update(UpdateBrandCommand brandCommand, string updatedBy)
     {
-        // Preserve the original creation information
         base.Update(updatedBy);
         
-        // Update only mutable properties
         Name = brandCommand.Name;
         Image = brandCommand.Image;
+    }
+
+    public void UpdateWithoutImage(UpdateBrandCommand command, string updatedBy)
+    {
+        base.Update(updatedBy);
+        Name = command.Name;
     }
 }

@@ -25,6 +25,7 @@ public class UpdateBrandCommandHandler : IRequestHandler<UpdateBrandCommand, Uni
             KEY, 
             cancellationToken: cancellationToken
         ) ?? new List<BrandMetaData>();
+        
         var brandToUpdate = brandMetadataList.FirstOrDefault(b => 
             string.Equals(b.Id, command.Id, StringComparison.OrdinalIgnoreCase));
 
@@ -34,7 +35,19 @@ public class UpdateBrandCommandHandler : IRequestHandler<UpdateBrandCommand, Uni
                 $"Brand with id '{command.Id}' not found."
             );
         }
-        brandToUpdate.Update(command, command.UpdatedBy);
+
+        // If image is null, keep the existing image
+        if (command.Image == null)
+        {
+            // Don't update the image, only update other properties
+            brandToUpdate.UpdateWithoutImage(command, command.UpdatedBy);
+        }
+        else
+        {
+            // Update all properties including the image
+            brandToUpdate.Update(command, command.UpdatedBy);
+        }
+        
         await _daprClient.SaveStateAsync(
             STORE_NAME, 
             KEY, 

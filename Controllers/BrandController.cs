@@ -11,7 +11,7 @@ using Think4.Services;
 [Route("api/brands")]
 public class BrandController : ControllerBase
 {
-     private readonly IMediator _mediator;
+    private readonly IMediator _mediator;
     private readonly ICloudinaryService _cloudinaryService;
 
     public BrandController(IMediator mediator, ICloudinaryService cloudinaryService)
@@ -130,23 +130,25 @@ public class BrandController : ControllerBase
                 "VALIDATION_ERROR"
             ));
         }
-        
+
         try
         {
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             string imageUrl = null;
-            if (!string.IsNullOrEmpty(giftDto.ImageBase64))
+
+            if (!string.IsNullOrEmpty(giftDto.ImageBase64) &&
+                !giftDto.ImageBase64.StartsWith("http"))
             {
                 imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
             }
-            
+
             var command = new UpdateBrandCommand(
                 giftDto.Id,
                 giftDto.Name,
-                imageUrl ?? "",
+                imageUrl,
                 username
             );
-            
+
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
         }

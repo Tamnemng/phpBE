@@ -7,7 +7,7 @@ public class UpdateBrandCommand : IRequest<Unit>
     public string Image { get; set; }
     public string UpdatedBy { get; set; }
     
-    public UpdateBrandCommand( string name, string id, string image, string updatedBy)
+    public UpdateBrandCommand( string id, string name, string image, string updatedBy)
     {
         Id = id;
         Name = name;
