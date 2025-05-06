@@ -58,8 +58,24 @@ public class CartController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("get")]
+    public async Task<IActionResult> GetCart()
+    {
+        try
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var cart = await _mediator.Send(new GetCartQuery(userId));
+            return Ok(ApiResponse<object>.CreateSuccess(cart, "Lấy giỏ hàng thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
+        }
+    }
+
+    [Authorize]
     [HttpGet("get/{userId}")]
-    public async Task<IActionResult> GetCart(string userId)
+    public async Task<IActionResult> GetUserCart(string userId)
     {
         try
         {
@@ -74,7 +90,7 @@ public class CartController : ControllerBase
 
     [Authorize]
     [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteFromCart([FromBody] DeleteFromCartCommand command)
+    public async Task<IActionResult> DeleteFromCart([FromBody] DeleteCartDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -93,6 +109,11 @@ public class CartController : ControllerBase
         }
         try
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var command = new DeleteFromCartCommand(
+               userId,
+               dto.ItemInfo
+           );
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa sản phẩm khỏi giỏ hàng thành công!"));
         }
