@@ -90,42 +90,63 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             throw new InvalidOperationException("At least one variant group with options is required.");
         }
 
-        // Process and upload images for each variant
+        // Process and upload images for each variant (if they exist)
         foreach (var group in command.Variants)
         {
             foreach (var variant in group.Options)
             {
-                bool missingImages = variant.ImagesBase64 == null || !variant.ImagesBase64.Any();
-                
-                if (missingImages)
-                {
-                    throw new InvalidOperationException("All variants must have at least one Base64 image.");
-                }
-                
                 var uploadedImages = new List<Image>();
                 
-                foreach (var imageBase64 in variant.ImagesBase64)
+                // Only process images if they exist
+                if (variant.ImagesBase64 != null && variant.ImagesBase64.Any())
                 {
-                    if (!string.IsNullOrEmpty(imageBase64.Base64Content))
+                    foreach (var imageBase64 in variant.ImagesBase64)
                     {
-                        try
+                        if (!string.IsNullOrEmpty(imageBase64.Base64Content))
                         {
-                            string imageUrl = await _cloudinaryService.UploadImageBase64Async(imageBase64.Base64Content);
-                            
-                            uploadedImages.Add(new Image
+                            try
                             {
-                                Url = imageUrl,
-                                piority = imageBase64.Priority
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException($"Failed to upload image: {ex.Message}");
+                                string imageUrl = await _cloudinaryService.UploadImageBase64Async(imageBase64.Base64Content);
+                                
+                                uploadedImages.Add(new Image
+                                {
+                                    Url = imageUrl,
+                                    piority = imageBase64.Priority
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new InvalidOperationException($"Failed to upload image: {ex.Message}");
+                            }
                         }
                     }
                 }
                 
                 variant.Images = uploadedImages;
+            }
+        }
+
+        // Check for variants that require images (e.g., color variants)
+        bool hasImageVariant = false;
+        foreach (var group in command.Variants)
+        {
+            // Check if this is an image-requiring variant (like color)
+            bool isImageVariant = IsImageRequiringVariant(group.OptionTitle);
+            
+            if (isImageVariant)
+            {
+                hasImageVariant = true;
+                
+                // Verify all options in image-requiring variant groups have images
+                foreach (var variant in group.Options)
+                {
+                    bool missingImages = variant.Images == null || !variant.Images.Any();
+                    
+                    if (missingImages)
+                    {
+                        throw new InvalidOperationException($"All '{group.OptionTitle}' variants must have at least one image.");
+                    }
+                }
             }
         }
         
@@ -162,31 +183,68 @@ public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Unit>
             
             productVariation.ProductOptions = productOptions;
             
-            // Set product detail from the selected variants
-            foreach (var group in command.Variants)
+            // Determine which variant to use for images
+            // First, try to find an image-requiring variant group (like color)
+            var imageVariantGroup = command.Variants.FirstOrDefault(g => IsImageRequiringVariant(g.OptionTitle));
+            var allImages = new List<Image>();
+            
+            if (imageVariantGroup != null)
             {
-                var selectedOption = variantCombination.SelectedOptions[group.OptionTitle];
-                var selectedVariant = group.Options.FirstOrDefault(v => v.OptionLabel == selectedOption);
+                // Use the selected option from the image variant group for images
+                var selectedImageOptionLabel = variantCombination.SelectedOptions[imageVariantGroup.OptionTitle];
+                var selectedImageVariant = imageVariantGroup.Options.FirstOrDefault(v => v.OptionLabel == selectedImageOptionLabel);
                 
-                if (selectedVariant != null && group.OptionTitle == command.Variants.First().OptionTitle)
+                if (selectedImageVariant != null && selectedImageVariant.Images != null)
                 {
-                    // Use the first group's selected variant for main product details
-                    productVariation.ProductDetail = new ProductDetail(
-                        selectedVariant.Descriptions,
-                        selectedVariant.Images,
-                        selectedVariant.ShortDescription
-                    );
-                    
-                    // Set price from the first group's selected variant
-                    productVariation.Price = Price.Create(selectedVariant.OriginalPrice, selectedVariant.CurrentPrice);
+                    allImages.AddRange(selectedImageVariant.Images);
                 }
             }
+            
+            // Merge descriptions from all selected variants
+            var allDescriptions = new List<Description>();
+            
+            // For each variant group in the combination
+            foreach (var group in command.Variants)
+            {
+                // Get the selected option for this group
+                string selectedOptionLabel = variantCombination.SelectedOptions[group.OptionTitle];
+                var selectedVariant = group.Options.FirstOrDefault(o => o.OptionLabel == selectedOptionLabel);
+                
+                // Add descriptions from this variant
+                if (selectedVariant != null && selectedVariant.Descriptions != null)
+                {
+                    allDescriptions.AddRange(selectedVariant.Descriptions);
+                }
+            }
+            
+            // Get short description from main variant (usually the first one)
+            string shortDescription = variantCombination.MainVariant.ShortDescription;
+            
+            // Set the combined product details
+            productVariation.ProductDetail = new ProductDetail(
+                allDescriptions,
+                allImages,
+                shortDescription
+            );
+            
+            // Always set price from the mainVariant
+            productVariation.Price = Price.Create(variantCombination.MainVariant.OriginalPrice, variantCombination.MainVariant.CurrentPrice);
             
             products.Add(productVariation);
         }
 
         await _daprClient.SaveStateAsync(STORE_NAME, PRODUCTS_KEY, products, cancellationToken: cancellationToken);
         return Unit.Value;
+    }
+
+    // Helper method to determine if a variant type requires images
+    // This is where you define which variant types need images (like color) and which don't (like storage)
+    private bool IsImageRequiringVariant(string variantTitle)
+    {
+        // Add your logic to determine if the variant type requires images
+        // For example, color variants need images, but storage capacity doesn't
+        string title = variantTitle.ToLowerInvariant();
+        return title.Contains("color") || title.Contains("màu") || title.Contains("colour");
     }
 
     // Helper class to store variant combination information

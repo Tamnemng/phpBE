@@ -51,9 +51,6 @@ public class ProductVariantDto
     
     public IEnumerable<Description> Descriptions { get; set; }
     
-    // Remove Images collection that accepts URLs
-    // Only accept Base64 encoded images
-    [Required]
     public IEnumerable<ImageBase64Dto> ImagesBase64 { get; set; }
     
     public string ShortDescription { get; set; }

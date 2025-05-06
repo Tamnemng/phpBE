@@ -55,27 +55,30 @@ public class ProductController : ControllerBase
                 ));
             }
 
-            bool missingImages = false;
+            // Check if there are any image-requiring variants (e.g., color variants)
+            bool hasImageVariant = false;
             foreach (var group in productDto.Variants)
             {
-                foreach (var option in group.Options)
+                // Check if this is an image-requiring variant (like color)
+                bool isImageVariant = IsImageRequiringVariant(group.OptionTitle);
+
+                if (isImageVariant)
                 {
-                    if (option.ImagesBase64 == null || !option.ImagesBase64.Any())
+                    hasImageVariant = true;
+
+                    // Verify all options in image-requiring variant groups have images
+                    foreach (var option in group.Options)
                     {
-                        missingImages = true;
-                        break;
+                        if (option.ImagesBase64 == null || !option.ImagesBase64.Any())
+                        {
+                            return BadRequest(ApiResponse<object>.CreateError(
+                                $"All '{group.OptionTitle}' variants must have at least one Base64 image",
+                                HttpStatusCode.BadRequest,
+                                "VALIDATION_ERROR"
+                            ));
+                        }
                     }
                 }
-                if (missingImages) break;
-            }
-
-            if (missingImages)
-            {
-                return BadRequest(ApiResponse<object>.CreateError(
-                    "All variants must have at least one Base64 image",
-                    HttpStatusCode.BadRequest,
-                    "VALIDATION_ERROR"
-                ));
             }
 
             if (string.IsNullOrEmpty(productDto.ImageBase64))
@@ -106,6 +109,13 @@ public class ProductController : ControllerBase
         {
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
+    }
+
+    private bool IsImageRequiringVariant(string variantTitle)
+    {
+        
+        string title = variantTitle.ToLowerInvariant();
+        return title.Contains("color") || title.Contains("Color") || title.Contains("Màu") || title.Contains("màu") || title.Contains("colour") || title.Contains("Colour");
     }
 
     [HttpGet("{id}")]
