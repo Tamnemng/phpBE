@@ -78,8 +78,6 @@ public class GetProductVariantsHandler : IRequestHandler<GetProductVariantsQuery
                 Id = product.ProductInfo.Id,
                 Price = product.Price.CurrentPrice,
                 OriginalPrice = product.Price.OriginalPrice,
-                Quantity = product.ProductOptions.SelectMany(o => o.Options)
-                                     .Count(o => o.Selected)
             };
 
             // Collect all selected options

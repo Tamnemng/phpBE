@@ -20,6 +20,5 @@ public class ProductVariantDetailDto
     public Dictionary<string, string> SelectedOptions { get; set; } = new Dictionary<string, string>();
     public decimal Price { get; set; }
     public decimal OriginalPrice { get; set; }
-    public int Quantity { get; set; }
     public List<string> ImageUrls { get; set; } = new List<string>();
 }
