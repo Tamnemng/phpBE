@@ -30,8 +30,16 @@ public class UpdateGiftCommandHandler : IRequestHandler<UpdateGiftCommand, Unit>
                 $"A gift with id '{command.Id}' does not exist."
             );
         }
-
-        giftToUpdate.Update(command, command.UpdatedBy);
+        if (command.Image == null)
+        {
+            // Don't update the image, only update other properties
+            giftToUpdate.UpdateWithoutImage(command, command.UpdatedBy);
+        }
+        else
+        {
+            // Update all properties including the image
+            giftToUpdate.Update(command, command.UpdatedBy);
+        }
 
         await _daprClient.SaveStateAsync(
             STORE_NAME, 

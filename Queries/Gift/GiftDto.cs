@@ -15,7 +15,7 @@ public class AddGiftDto
 public class UpdateGiftDto
 {
     [Required]
-    public string Code { get; set; }
+    public string Id { get; set; }
     
     [Required]
     public string Name { get; set; }

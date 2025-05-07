@@ -78,4 +78,10 @@ public class GiftMetaData : BaseEntity
         Name = giftCommand.Name;
         Image = giftCommand.Image;
     }
+
+    public void UpdateWithoutImage(UpdateGiftCommand command, string updatedBy)
+    {
+        base.Update(updatedBy);
+        Name = command.Name;
+    }
 }

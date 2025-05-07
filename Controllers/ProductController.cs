@@ -172,49 +172,7 @@ public class ProductController : ControllerBase
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_DELETE_ERROR"));
         }
     }
-    [Authorize(Roles = "Admin, Manager")]
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateProduct([FromBody] ProductUpdateDto productDto)
-    {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState
-                .Where(e => e.Value.Errors.Count > 0)
-                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
-                .ToList();
 
-            var errorMessage = string.Join("; ", errors);
-
-            return BadRequest(ApiResponse<object>.CreateError(
-                errorMessage,
-                HttpStatusCode.BadRequest,
-                "VALIDATION_ERROR"
-            ));
-        }
-
-        try
-        {
-            if (!string.IsNullOrEmpty(productDto.ImageBase64))
-            {
-                        productDto.ImageUrl = await _cloudinaryService.UploadImageBase64Async(productDto.ImageBase64);
-                    }
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-
-            var command = new UpdateProductCommand(productDto, username);
-
-            await _mediator.Send(command);
-
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật sản phẩm thành công!"));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
-        }
-    }
 
     [HttpGet("related")]
     public async Task<IActionResult> GetRelatedProducts([FromQuery] string productCode, [FromQuery] int count = 5)
@@ -285,6 +243,356 @@ public class ProductController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = $"An error occurred: {ex.Message}" });
+        }
+    }
+
+    [HttpPut("updateProductBrand")]
+    public async Task<IActionResult> UpdateProductBrand(string productCode ,[FromBody] UpdateProductBrandDto updateProductBrandDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductBrandCommand(productCode, updateProductBrandDto.BrandCode, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductCategories")]
+    public async Task<IActionResult> UpdateProductCategories(string productCode ,[FromBody] UpdateProductCategoriesDto updateProductCategoriesDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductCategoriesCommand(productCode, updateProductCategoriesDto.CategoriesCode, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductMainImage")]
+    public async Task<IActionResult> UpdateProductMainImage(string productCode ,[FromBody] UpdateProductImageDto updateProductImageDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            if (string.IsNullOrEmpty(updateProductImageDto.ImageBase64))
+            {
+                return BadRequest(ApiResponse<object>.CreateError(
+                    "Product main image in Base64 format or URL is required",
+                    HttpStatusCode.BadRequest,
+                    "VALIDATION_ERROR"
+                ));
+            }
+
+            string urlImage;
+            if (updateProductImageDto.ImageBase64.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                urlImage = updateProductImageDto.ImageBase64;
+            }
+            else if (updateProductImageDto.ImageBase64.StartsWith("data:image", StringComparison.OrdinalIgnoreCase))
+            {
+                urlImage = await _cloudinaryService.UploadImageBase64Async(updateProductImageDto.ImageBase64);
+            }
+            else
+            {
+                return BadRequest(ApiResponse<object>.CreateError(
+                    "Invalid image format. Please provide a valid Base64 image string or a URL.",
+                    HttpStatusCode.BadRequest,
+                    "VALIDATION_ERROR"
+                ));
+            }
+            var command = new UpdateProductImageCommand(productCode, urlImage, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductStatusById")]
+    public async Task<IActionResult> UpdateProductStatusById(string productId, [FromBody] UpdateProductStatusDto updateProductStatusDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductStatusByIdCommand(productId, updateProductStatusDto.Status, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật trạng thái sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductStatusByCode")]
+    public async Task<IActionResult> UpdateProductStatusByCode(string productCode, [FromBody] UpdateProductStatusDto updateProductStatusDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductStatusByCodeCommand(productCode, updateProductStatusDto.Status, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật trạng thái sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductPriceById")]
+    public async Task<IActionResult> UpdateVariantPrice(string productId, [FromBody] UpdateVariantPriceDto updateVariantPriceDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateVariantPriceCommand(productId, updateVariantPriceDto.OriginalPrice, updateVariantPriceDto.CurrentPrice, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật giá sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductName")]
+    public async Task<IActionResult> UpdateProductName(string productCode, [FromBody] UpdateProductNameDto updateProductNameDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductNameCommand(productCode, updateProductNameDto.Name, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật tên sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductGift")]
+    public async Task<IActionResult> UpdateProductGift(string productCode, [FromBody] UpdateProductGiftsDto updateProductGiftDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductGiftsCommand(productCode, updateProductGiftDto.GiftCodes, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
+        }
+    }
+
+    [HttpPut("updateProductDescriptions")]
+    public async Task<IActionResult> UpdateProductDescriptions(string productId, [FromBody] UpdateVariantDescriptionsDto updateVariantDescriptionsDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .Select(e => $"{e.Key}: {e.Value.Errors.First().ErrorMessage}")
+                .ToList();
+
+            var errorMessage = string.Join("; ", errors);
+
+            return BadRequest(ApiResponse<object>.CreateError(
+                errorMessage,
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR"
+            ));
+        }
+
+        try
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var command = new UpdateProductDescriptionsCommand(productId, updateVariantDescriptionsDto.Descriptions, updateVariantDescriptionsDto.ShortDescription, username);
+            await _mediator.Send(command);
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật mô tả sản phẩm thành công!"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "PRODUCT_UPDATE_ERROR"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
 }

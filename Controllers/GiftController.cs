@@ -134,24 +134,25 @@ public class GiftController : ControllerBase
                 "VALIDATION_ERROR"
             ));
         }
-        
+
         try
         {
-            // Upload image to Cloudinary if base64 is provided
             string imageUrl = null;
-            if (!string.IsNullOrEmpty(giftDto.ImageBase64))
+
+            if (!string.IsNullOrEmpty(giftDto.ImageBase64) &&
+                !giftDto.ImageBase64.StartsWith("http"))
             {
                 imageUrl = await _cloudinaryService.UploadImageBase64Async(giftDto.ImageBase64);
             }
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            
+
             var command = new UpdateGiftCommand(
-                giftDto.Code,
+                giftDto.Id,
                 giftDto.Name,
                 imageUrl ?? "",
                 username
             );
-            
+
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
         }

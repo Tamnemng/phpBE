@@ -78,6 +78,13 @@ public class Price
         decimal percentage = 100 - (currentPrice / originalPrice * 100);
         return Math.Round(percentage, 2);
     }
+
+    public void Update(decimal originalPrice, decimal currentPrice)
+    {
+        OriginalPrice = originalPrice;
+        CurrentPrice = currentPrice;
+        DiscountPercentage = CalculateDiscountPercentage(originalPrice, currentPrice);
+    }
 }
 
 public class UpdatePriceCommand
