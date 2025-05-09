@@ -169,4 +169,19 @@ public class CartController : ControllerBase
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
         }
     }
+
+    [Authorize]
+    [HttpPost("get-items-details")]
+    public async Task<IActionResult> GetItemsDetails([FromBody] List<ItemRequest> items)
+    {
+        try
+        {
+            var itemsDetails = await _mediator.Send(new GetItemsDetailsQuery(items));
+            return Ok(ApiResponse<object>.CreateSuccess(itemsDetails, "Lấy thông tin sản phẩm thành công!"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
+        }
+    }
 }

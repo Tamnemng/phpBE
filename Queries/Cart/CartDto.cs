@@ -43,3 +43,9 @@ public class DeleteCartDto
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public CartItemInfo[] ItemInfo { get; set; }
 }
+
+public class ItemRequest
+{
+    public string ItemId { get; set; }
+    public CartItemType ItemType { get; set; }
+}

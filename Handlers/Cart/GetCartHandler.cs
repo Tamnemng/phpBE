@@ -87,19 +87,30 @@ public class GetCartHandler : IRequestHandler<GetCartQuery, CartResponseDto>
 
         var response = new CartResponseDto(existingCart.UserId);
         
-        // Create product dictionary for faster lookups in combo products
-        var productDictionary = products.ToDictionary(
-            p => p.ProductInfo.Code,
-            p => new ProductSummaryDto
+        // FIXED: Create product dictionary handling potential duplicate keys
+        var productDictionary = new Dictionary<string, ProductSummaryDto>();
+        foreach (var product in products)
+        {
+            if (!productDictionary.ContainsKey(product.ProductInfo.Code))
             {
-                Id = p.ProductInfo.Id,
-                Code = p.ProductInfo.Code,
-                Name = p.ProductInfo.Name,
-                ImageUrl = p.ProductInfo.ImageUrl,
-                CurrentPrice = p.Price.CurrentPrice,
-                OriginalPrice = p.Price.OriginalPrice,
-                ShortDescription = p.ProductDetail.ShortDescription
-            });
+                productDictionary.Add(product.ProductInfo.Code, new ProductSummaryDto
+                {
+                    Id = product.ProductInfo.Id,
+                    Code = product.ProductInfo.Code,
+                    Name = product.ProductInfo.Name,
+                    ImageUrl = product.ProductInfo.ImageUrl,
+                    CurrentPrice = product.Price.CurrentPrice,
+                    OriginalPrice = product.Price.OriginalPrice,
+                    ShortDescription = product.ProductDetail.ShortDescription
+                });
+            }
+            else
+            {
+                // Log or handle duplicate product code
+                // You could choose to update the existing entry or skip it
+                // For now, we're just skipping it
+            }
+        }
             
         foreach (var item in existingCart.Items)
         {
