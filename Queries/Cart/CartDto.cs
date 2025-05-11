@@ -39,9 +39,16 @@ public class UpdateCartDto
 
 public class DeleteCartDto
 {
-    [Required]
+    public CartItemInfoDto[] ItemInfo { get; set; }
+}
+
+// DTO for cart item information
+public class CartItemInfoDto
+{
+    public string ItemId { get; set; }
+    
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public CartItemInfo[] ItemInfo { get; set; }
+    public CartItemType ItemType { get; set; }
 }
 
 public class ItemRequest

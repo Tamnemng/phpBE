@@ -111,9 +111,11 @@ public class CartController : ControllerBase
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var command = new DeleteFromCartCommand(
-               userId,
-               dto.ItemInfo
-           );
+                userId,
+                dto.ItemInfo.Select(item => 
+                    new CartItemInfo(item.ItemId, item.ItemType)).ToArray()
+            );
+
             await _mediator.Send(command);
             return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa sản phẩm khỏi giỏ hàng thành công!"));
         }
