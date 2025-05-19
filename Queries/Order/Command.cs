@@ -1,4 +1,3 @@
-// Queries/Order/Command.cs
 using MediatR;
 using System.Collections.Generic;
 using OMS.Core.Queries;
@@ -7,6 +6,7 @@ using OMS.Core.Queries;
 public class CreateOrderCommand : IRequest<OrderDetailDto>
 {
     public string UserId { get; set; }
+    public List<OrderItemSelectionDto> SelectedItems { get; set; } // Thêm thuộc tính này
     public PaymentMethod PaymentMethod { get; set; }
     public string CustomerName { get; set; }
     public string CustomerPhone { get; set; }
@@ -16,9 +16,11 @@ public class CreateOrderCommand : IRequest<OrderDetailDto>
     public decimal ShippingFee { get; set; }
     public string CreatedBy { get; set; }
 
+    // Cập nhật constructor
     public CreateOrderCommand(string userId, CreateOrderDto dto, string createdBy)
     {
         UserId = userId;
+        SelectedItems = dto.SelectedItems; // Gán giá trị mới
         PaymentMethod = dto.PaymentMethod;
         CustomerName = dto.CustomerName;
         CustomerPhone = dto.CustomerPhone;

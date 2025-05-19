@@ -78,7 +78,7 @@ public class GetItemsDetailsHandler : IRequestHandler<GetItemsDetailsQuery, List
                     itemDetails.Name = product.ProductInfo.Name;
                     itemDetails.ImageUrl = product.ProductInfo.ImageUrl;
                     itemDetails.Price = product.Price.CurrentPrice;
-                    
+                    itemDetails.Description = product.ProductDetail.ShortDescription;
                     // Thêm discount percentage nếu sản phẩm có giảm giá
                     if (product.Price.DiscountPercentage > 0)
                     {
