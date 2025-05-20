@@ -25,7 +25,7 @@ public class CartItemDto
     public CartItemType ItemType { get; set; }
     public int Quantity { get; set; }
     
-    // Additional information based on type
+    public string Description { get; set; }
     public string Name { get; set; }
     public string ImageUrl { get; set; }
     public decimal Price { get; set; }
@@ -125,6 +125,7 @@ public class GetCartHandler : IRequestHandler<GetCartQuery, CartResponseDto>
                     cartItemDto.ImageUrl = product.ProductInfo.ImageUrl;
                     cartItemDto.Price = product.Price.CurrentPrice;
                     cartItemDto.TotalPrice = product.Price.CurrentPrice * item.Quantity;
+                    cartItemDto.Description = product.ProductDetail.ShortDescription;
                     
                     // Add discount percentage if product has a discount
                     if (product.Price.DiscountPercentage > 0)

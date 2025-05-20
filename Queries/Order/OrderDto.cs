@@ -1,9 +1,11 @@
-// Queries/Order/OrderDto.cs
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 
 public class CreateOrderDto
 {
+    [Required]
+    public List<OrderItemSelectionDto> SelectedItems { get; set; } // Thay đổi ở đây
+
     [Required]
     public PaymentMethod PaymentMethod { get; set; }
     
@@ -23,6 +25,11 @@ public class CreateOrderDto
     public string Notes { get; set; }
     
     public decimal ShippingFee { get; set; } = 0;
+
+    public CreateOrderDto() // Thêm constructor nếu cần
+    {
+        SelectedItems = new List<OrderItemSelectionDto>();
+    }
 }
 
 public class UpdateOrderStatusDto

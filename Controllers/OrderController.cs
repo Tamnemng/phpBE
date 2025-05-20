@@ -160,7 +160,7 @@ public class OrderController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     [HttpPut("payment")]
     public async Task<IActionResult> UpdatePaymentStatus([FromBody] UpdatePaymentStatusDto updateDto)
     {

@@ -171,8 +171,7 @@ public class CartController : ControllerBase
             return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "SERVER_ERROR"));
         }
     }
-
-    [Authorize]
+    
     [HttpPost("get-items-details")]
     public async Task<IActionResult> GetItemsDetails([FromBody] List<ItemRequest> items)
     {

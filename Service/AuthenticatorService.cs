@@ -202,8 +202,6 @@ namespace Think4.Services
 
         private string HashPassword(string password)
         {
-            // In a real application, you would use a proper password hashing algorithm
-            // like BCrypt, Argon2, or PBKDF2. This is a simplified example.
             using var sha256 = SHA256.Create();
             var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(hashedBytes);
