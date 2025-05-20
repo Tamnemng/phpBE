@@ -45,7 +45,7 @@ public class OrderController : ControllerBase
             var command = new CreateOrderCommand(userId, orderDto, username);
             var result = await _mediator.Send(command);
 
-            return Ok(ApiResponse<OrderDetailDto>.CreateSuccess(result, "Đặt hàng thành công!"));
+            return Ok(ApiResponse<OrderDetailDto>.CreateSuccess(result, "Order placed successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -67,7 +67,7 @@ public class OrderController : ControllerBase
             var query = new GetUserOrdersQuery(userId, pageIndex, pageSize);
             var result = await _mediator.Send(query);
 
-            return Ok(ApiResponse<object>.CreateSuccess(result, "Lấy danh sách đơn hàng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(result, "User order list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -88,7 +88,7 @@ public class OrderController : ControllerBase
             var query = new GetOrderByIdQuery(id, isAdmin ? null : userId);
             var result = await _mediator.Send(query);
 
-            return Ok(ApiResponse<OrderDetailDto>.CreateSuccess(result, "Lấy thông tin đơn hàng thành công!"));
+            return Ok(ApiResponse<OrderDetailDto>.CreateSuccess(result, "Order details retrieved successfully!"));
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -113,7 +113,7 @@ public class OrderController : ControllerBase
             var query = new GetAllOrdersQuery(pageIndex, pageSize, status);
             var result = await _mediator.Send(query);
 
-            return Ok(ApiResponse<object>.CreateSuccess(result, "Lấy danh sách đơn hàng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(result, "Order list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -148,7 +148,7 @@ public class OrderController : ControllerBase
             
             await _mediator.Send(command);
             
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật trạng thái đơn hàng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Order status updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -187,7 +187,7 @@ public class OrderController : ControllerBase
             
             await _mediator.Send(command);
             
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật trạng thái thanh toán thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Payment status updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -217,7 +217,7 @@ public class OrderController : ControllerBase
             var command = new UpdateOrderStatusCommand(id, OrderStatus.Canceled, username);
             await _mediator.Send(command);
             
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Hủy đơn hàng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Order canceled successfully!"));
         }
         catch (UnauthorizedAccessException ex)
         {

@@ -26,7 +26,7 @@ public class BrandController : ControllerBase
         try
         {
             var values = await _mediator.Send(new GetAllBrandNamesQuery());
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách hãng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Brand list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -40,7 +40,7 @@ public class BrandController : ControllerBase
         try
         {
             var values = await _mediator.Send(new GetAllBrandQuery(pageIndex, pageSize));
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách thương hiệu thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Brand list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -84,7 +84,7 @@ public class BrandController : ControllerBase
             );
 
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm brand thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Brand added successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -103,7 +103,7 @@ public class BrandController : ControllerBase
         try
         {
             await _mediator.Send(new DeleteBrandCommand(id));
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa thương hiệu thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Brand deleted successfully!"));
         }
         catch (Exception ex)
         {
@@ -150,7 +150,7 @@ public class BrandController : ControllerBase
             );
 
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Brand updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {

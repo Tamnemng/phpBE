@@ -1,4 +1,3 @@
-
 using MediatR;
 using Dapr.Client;
 
@@ -24,7 +23,7 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
 
         if (nonExistingIds.Any())
         {
-            throw new InvalidOperationException($"Không tìm thấy sản phẩm với CODE: {string.Join(", ", nonExistingIds)}");
+            throw new InvalidOperationException($"Product not found with CODE: {string.Join(", ", nonExistingIds)}");
         }
 
         var initialCount = products.Count;

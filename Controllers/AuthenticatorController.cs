@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
                 Expiration = DateTime.UtcNow.AddDays(7)
             };
             
-            return Ok(ApiResponse<LoginResponseDto>.CreateSuccess(response, "Đăng nhập thành công!"));
+            return Ok(ApiResponse<LoginResponseDto>.CreateSuccess(response, "Login successful!"));
         }
         catch (Exception ex)
         {
@@ -89,7 +89,7 @@ public class AuthController : ControllerBase
             
             var userDto = new UserDto(user);
             
-            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Đăng ký thành công!"));
+            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Registration successful!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -127,7 +127,7 @@ public class AuthController : ControllerBase
             
             var userDto = new UserDto(user);
             
-            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Đăng ký tài khoản quản lý thành công!"));
+            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Manager account registration successful!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -186,7 +186,7 @@ public class AuthController : ControllerBase
             // Invalidate the session
             await _authService.LogoutUser(userId);
             
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Đăng xuất thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Logout successful!"));
         }
         catch (Exception ex)
         {

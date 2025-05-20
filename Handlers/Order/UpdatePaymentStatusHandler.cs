@@ -30,7 +30,7 @@ public class UpdatePaymentStatusHandler : IRequestHandler<UpdatePaymentStatusCom
         
         if (order == null)
         {
-            throw new InvalidOperationException($"Không tìm thấy đơn hàng với ID: {request.OrderId}");
+            throw new InvalidOperationException($"Order not found with ID: {request.OrderId}");
         }
         
         // Validate payment status transition
@@ -72,7 +72,7 @@ public class UpdatePaymentStatusHandler : IRequestHandler<UpdatePaymentStatusCom
         
         if (!isValid)
         {
-            throw new InvalidOperationException($"Không thể chuyển trạng thái thanh toán từ {currentStatus} sang {newStatus}");
+            throw new InvalidOperationException($"Cannot change payment status from {currentStatus} to {newStatus}");
         }
     }
 }

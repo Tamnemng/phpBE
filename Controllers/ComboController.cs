@@ -28,7 +28,7 @@ public class ComboController : ControllerBase
             var query = new GetAllCombosQuery(pageIndex, pageSize, includeInactive);
             var result = await _mediator.Send(query);
 
-            return Ok(ApiResponse<object>.CreateSuccess(result, "Lấy danh sách combo thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(result, "Combo list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -44,7 +44,7 @@ public class ComboController : ControllerBase
             var query = new GetComboByIdQuery(id);
             var result = await _mediator.Send(query);
 
-            return Ok(ApiResponse<ComboDto>.CreateSuccess(result, "Lấy thông tin combo thành công!"));
+            return Ok(ApiResponse<ComboDto>.CreateSuccess(result, "Combo details retrieved successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -97,7 +97,7 @@ public class ComboController : ControllerBase
 
             await _mediator.Send(command);
 
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm combo thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Combo added successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -152,7 +152,7 @@ public class ComboController : ControllerBase
 
             await _mediator.Send(command);
 
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật combo thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Combo updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -182,7 +182,7 @@ public class ComboController : ControllerBase
                 ));
             }
 
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa combo thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Combo deleted successfully!"));
         }
         catch (Exception ex)
         {
@@ -198,7 +198,7 @@ public class ComboController : ControllerBase
             var query = new GetCombosByProductCodeQuery(productCode);
             var result = await _mediator.Send(query);
             
-            return Ok(ApiResponse<List<ComboDto>>.CreateSuccess(result, "Lấy danh sách combo theo sản phẩm thành công!"));
+            return Ok(ApiResponse<List<ComboDto>>.CreateSuccess(result, "Retrieved combo list by product successfully!"));
         }
         catch (InvalidOperationException ex)
         {

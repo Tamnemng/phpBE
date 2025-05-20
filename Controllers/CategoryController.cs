@@ -23,7 +23,7 @@ public class CategoryController : ControllerBase
         try
         {
             var values = await _mediator.Send(new GetAllCategoryQuery(pageIndex, pageSize));
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách danh mục thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Category list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -37,7 +37,7 @@ public class CategoryController : ControllerBase
         try
         {
             var values = await _mediator.Send(new GetAllCategoryNamesQuery());
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách tag thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Category list retrieved successfully!"));
         }
         catch (Exception ex)
         {
@@ -73,7 +73,7 @@ public class CategoryController : ControllerBase
                username
            );
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm danh mục thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Category added successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -91,7 +91,7 @@ public class CategoryController : ControllerBase
         try
         {
             await _mediator.Send(new DeleteCategoryCommand(id));
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa danh mục thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Category deleted successfully!"));
         }
         catch (Exception ex)
         {
@@ -127,7 +127,7 @@ public class CategoryController : ControllerBase
                username
            );
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật danh mục thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Category updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {

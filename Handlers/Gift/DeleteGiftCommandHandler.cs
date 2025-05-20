@@ -33,8 +33,7 @@ public class DeleteGiftCommandHandler : IRequestHandler<DeleteGiftCommand, bool>
 
         if (giftMetadataList.Count == initialCount)
         {
-            throw new InvalidOperationException($"Không tìm thấy quà tặng với CODE: {string.Join(", ", command.Id)}");
-
+            throw new InvalidOperationException($"Gift not found with CODE: {string.Join(", ", command.Id)}");
         }
 
         await _daprClient.SaveStateAsync(

@@ -27,7 +27,7 @@ public class GiftController : ControllerBase
         try
         {
             var values = await _mediator.Send(new GetAllGiftNamesQuery());
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Successfully retrieved gift list!"));
         }
         catch (Exception ex)
         {
@@ -41,7 +41,7 @@ public class GiftController : ControllerBase
         try
         {
             var values = await _mediator.Send(new GetAllGiftQuery(pageIndex, pageSize));
-            return Ok(ApiResponse<object>.CreateSuccess(values, "Lấy danh sách quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(values, "Successfully retrieved gift list!"));
         }
         catch (Exception ex)
         {
@@ -88,7 +88,7 @@ public class GiftController : ControllerBase
             );
 
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Gift added successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -107,11 +107,11 @@ public class GiftController : ControllerBase
         try
         {
             await _mediator.Send(new DeleteGiftCommand(id));
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Gift deleted successfully!"));
         }
         catch (Exception ex)
         {
-            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "BRAND_DELETE_ERROR"));
+            return BadRequest(ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.BadRequest, "GIFT_DELETE_ERROR"));
         }
     }
 
@@ -154,7 +154,7 @@ public class GiftController : ControllerBase
             );
 
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Gift updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
