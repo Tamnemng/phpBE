@@ -99,7 +99,7 @@ public class ProductController : ControllerBase
 
             await _mediator.Send(command);
 
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Thêm sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product added successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -126,7 +126,7 @@ public class ProductController : ControllerBase
             var query = new GetProductByIdQuery(id);
             var product = await _mediator.Send(query);
 
-            return Ok(ApiResponse<Product>.CreateSuccess(product, "Lấy thông tin sản phẩm thành công!"));
+            return Ok(ApiResponse<Product>.CreateSuccess(product, "Retrieved product information successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -151,7 +151,7 @@ public class ProductController : ControllerBase
                 pageSize);
             var pagedProducts = await _mediator.Send(query);
 
-            return Ok(ApiResponse<PagedModel<ProductSummaryDto>>.CreateSuccess(pagedProducts, "Lấy danh sách sản phẩm thành công!"));
+            return Ok(ApiResponse<PagedModel<ProductSummaryDto>>.CreateSuccess(pagedProducts, "Retrieved product list successfully!"));
         }
         catch (Exception ex)
         {
@@ -165,7 +165,7 @@ public class ProductController : ControllerBase
         try
         {
             await _mediator.Send(new DeleteProductCommand(code));
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Xóa sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Products deleted successfully!"));
         }
         catch (Exception ex)
         {
@@ -191,7 +191,7 @@ public class ProductController : ControllerBase
             var query = new GetRelatedProductsQuery(productCode, count);
             var relatedProducts = await _mediator.Send(query);
 
-            return Ok(ApiResponse<List<ProductSummaryDto>>.CreateSuccess(relatedProducts, "Lấy danh sách sản phẩm liên quan thành công!"));
+            return Ok(ApiResponse<List<ProductSummaryDto>>.CreateSuccess(relatedProducts, "Retrieved related products list successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -208,11 +208,11 @@ public class ProductController : ControllerBase
     {
         try
         {
-            // Tạo query để lấy tất cả sản phẩm có cùng mã code
+            // Create query to get all products with the same code
             var query = new GetProductVariantsQuery(code);
             var variants = await _mediator.Send(query);
 
-            return Ok(ApiResponse<ProductVariantsDto>.CreateSuccess(variants, "Lấy biến thể sản phẩm thành công!"));
+            return Ok(ApiResponse<ProductVariantsDto>.CreateSuccess(variants, "Retrieved product variants successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -270,7 +270,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductBrandCommand(productCode, updateProductBrandDto.BrandCode, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Brand updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -306,7 +306,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductCategoriesCommand(productCode, updateProductCategoriesDto.CategoriesCode, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product categories updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -368,7 +368,7 @@ public class ProductController : ControllerBase
             }
             var command = new UpdateProductImageCommand(productCode, urlImage, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật thương hiệu sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product image updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -404,7 +404,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductStatusByIdCommand(productId, updateProductStatusDto.Status, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật trạng thái sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product status updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -440,7 +440,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductStatusByCodeCommand(productCode, updateProductStatusDto.Status, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật trạng thái sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product status updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -476,7 +476,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateVariantPriceCommand(productId, updateVariantPriceDto.OriginalPrice, updateVariantPriceDto.CurrentPrice, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật giá sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product price updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -512,7 +512,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductNameCommand(productCode, updateProductNameDto.Name, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật tên sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product name updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -548,7 +548,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductGiftsCommand(productCode, updateProductGiftDto.GiftCodes, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật quà tặng sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product gifts updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -584,7 +584,7 @@ public class ProductController : ControllerBase
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var command = new UpdateProductDescriptionsCommand(productId, updateVariantDescriptionsDto.Descriptions, updateVariantDescriptionsDto.ShortDescription, username);
             await _mediator.Send(command);
-            return Ok(ApiResponse<object>.CreateSuccess(null, "Cập nhật mô tả sản phẩm thành công!"));
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Product descriptions updated successfully!"));
         }
         catch (InvalidOperationException ex)
         {

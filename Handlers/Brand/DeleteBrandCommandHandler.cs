@@ -1,4 +1,3 @@
-
 using MediatR;
 using Dapr.Client;
 
@@ -23,7 +22,7 @@ public class DeleteBrandCommandHandler : IRequestHandler<DeleteBrandCommand, boo
 
         if (nonExistingIds.Any())
         {
-            throw new InvalidOperationException($"Không tìm thấy thương hiệu với CODE: {string.Join(", ", nonExistingIds)}");
+            throw new InvalidOperationException($"Brand not found with CODE: {string.Join(", ", nonExistingIds)}");
         }
 
         var initialCount = brands.Count;

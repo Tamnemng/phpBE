@@ -36,7 +36,7 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDetai
         
         if (userCart == null || !userCart.Items.Any())
         {
-            throw new InvalidOperationException("Không thể tạo đơn hàng vì giỏ hàng trống.");
+            throw new InvalidOperationException("Cannot create order because the cart is empty.");
         }
         
         // Get products and combos to calculate prices
@@ -98,7 +98,7 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDetai
         
         if (!orderItems.Any())
         {
-            throw new InvalidOperationException("Không thể tạo đơn hàng vì không có sản phẩm hợp lệ trong giỏ hàng.");
+            throw new InvalidOperationException("Cannot create order because no valid items were found in the cart.");
         }
         
         // Create order

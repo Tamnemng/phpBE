@@ -30,7 +30,7 @@ public class UpdateOrderStatusHandler : IRequestHandler<UpdateOrderStatusCommand
         
         if (order == null)
         {
-            throw new InvalidOperationException($"Không tìm thấy đơn hàng với ID: {request.OrderId}");
+            throw new InvalidOperationException($"Order not found with ID: {request.OrderId}");
         }
         
         // Validate status transition
@@ -80,7 +80,7 @@ public class UpdateOrderStatusHandler : IRequestHandler<UpdateOrderStatusCommand
         
         if (!isValid)
         {
-            throw new InvalidOperationException($"Không thể chuyển trạng thái từ {currentStatus} sang {newStatus}");
+            throw new InvalidOperationException($"Cannot change status from {currentStatus} to {newStatus}");
         }
     }
 }

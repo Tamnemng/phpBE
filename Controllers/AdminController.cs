@@ -41,7 +41,7 @@ public class AdminController : ControllerBase
 
             var userDtos = users.Select(u => new UserDto(u)).ToList();
 
-            return Ok(ApiResponse<List<UserDto>>.CreateSuccess(userDtos, "Lấy danh sách người dùng thành công!"));
+            return Ok(ApiResponse<List<UserDto>>.CreateSuccess(userDtos, "Get all users successfully!"));
         }
         catch (Exception ex)
         {
@@ -66,7 +66,7 @@ public class AdminController : ControllerBase
             }
 
             var userDto = new UserDto(user);
-            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Lấy thông tin người dùng thành công!"));
+            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Get user successfully!"));
         }
         catch (Exception ex)
         {
@@ -104,7 +104,7 @@ public class AdminController : ControllerBase
 
             var userDto = new UserDto(user);
 
-            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Tạo tài khoản quản lý thành công!"));
+            return Ok(ApiResponse<UserDto>.CreateSuccess(userDto, "Manager account registration successful!"));
         }
         catch (InvalidOperationException ex)
         {
@@ -152,12 +152,12 @@ public class AdminController : ControllerBase
             };
 
             string message = result.SuccessCount > 0
-                ? $"Đã xóa thành công {result.SuccessCount} người dùng"
-                : "Không có người dùng nào được xóa";
+                ? $"Deleted {result.SuccessCount} user(s) successfully"
+                : "No users were deleted";
 
             if (result.FailedIds.Any())
             {
-                message += $". {result.FailedIds.Count} người dùng không thể xóa.";
+                message += $". {result.FailedIds.Count} users cannot be deleted.";
             }
 
             return Ok(ApiResponse<object>.CreateSuccess(responseData, message));
