@@ -13,6 +13,7 @@ public class GetAllOrdersHandler : IRequestHandler<GetAllOrdersQuery, PagedModel
     private readonly DaprClient _daprClient;
     private const string STORE_NAME = "statestore";
     private const string ORDERS_KEY = "orders";
+    private const string PRODUCTS_KEY = "products";
 
     public GetAllOrdersHandler(DaprClient daprClient)
     {
@@ -27,13 +28,17 @@ public class GetAllOrdersHandler : IRequestHandler<GetAllOrdersQuery, PagedModel
             cancellationToken: cancellationToken
         ) ?? new List<Order>();
         
-        // Apply filter if provided
+        var allProducts = await _daprClient.GetStateAsync<List<Product>>(
+            STORE_NAME,
+            PRODUCTS_KEY,
+            cancellationToken: cancellationToken
+        ) ?? new List<Product>();
+        
         if (request.StatusFilter.HasValue)
         {
             orders = orders.Where(o => o.Status == request.StatusFilter.Value).ToList();
         }
         
-        // Sort by created date, newest first
         orders = orders.OrderByDescending(o => o.CreatedDate).ToList();
         
         var totalCount = orders.Count;
@@ -47,7 +52,7 @@ public class GetAllOrdersHandler : IRequestHandler<GetAllOrdersQuery, PagedModel
         var pagedOrders = orders
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
-            .Select(o => new OrderSummaryDto(o))
+            .Select(o => new OrderSummaryDto(o, allProducts))
             .ToList();
         
         return new PagedModel<OrderSummaryDto>(totalCount, pagedOrders, request.PageIndex, request.PageSize);

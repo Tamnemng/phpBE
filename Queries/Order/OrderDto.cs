@@ -45,9 +45,29 @@ public class UpdatePaymentStatusDto
 {
     [Required]
     public string OrderId { get; set; }
-    
+
     [Required]
     public PaymentStatus NewStatus { get; set; }
+}
+
+public class OrderItemSummaryDto
+{
+    public string ItemId { get; set; }
+    public string Name { get; set; }
+    public string ImageUrl { get; set; }
+    public int Quantity { get; set; }
+    public decimal Price { get; set; }
+    public string ShortDescription { get; set; } // This might need to be fetched
+
+    public OrderItemSummaryDto(OrderItem item, Product productDetails)
+    {
+        ItemId = item.ItemId;
+        Name = item.Name;
+        ImageUrl = item.ImageUrl;
+        Quantity = item.Quantity;
+        Price = productDetails.Price.CurrentPrice;
+        ShortDescription = productDetails?.ProductDetail?.ShortDescription ?? (item.ItemType == CartItemType.Combo ? "Combo item" : "Product item");
+    }
 }
 
 public class OrderSummaryDto
@@ -59,8 +79,9 @@ public class OrderSummaryDto
     public OrderStatus Status { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
     public decimal FinalAmount { get; set; }
-    
-    public OrderSummaryDto(Order order)
+    public List<OrderItemSummaryDto> Items { get; set; } // Added list of items
+
+    public OrderSummaryDto(Order order, List<Product> allProducts)
     {
         Id = order.Id;
         OrderNumber = order.OrderNumber;
@@ -69,6 +90,15 @@ public class OrderSummaryDto
         Status = order.Status;
         PaymentStatus = order.PaymentStatus;
         FinalAmount = order.FinalAmount;
+        Items = order.Items.Select(item =>
+        {
+            Product productDetails = null;
+            if (item.ItemType == CartItemType.Product)
+            {
+                productDetails = allProducts?.FirstOrDefault(p => p.ProductInfo.Id == item.ItemId);
+            }
+            return new OrderItemSummaryDto(item, productDetails);
+        }).ToList();
     }
 }
 

@@ -13,6 +13,7 @@ public class GetUserOrdersHandler : IRequestHandler<GetUserOrdersQuery, PagedMod
     private readonly DaprClient _daprClient;
     private const string STORE_NAME = "statestore";
     private const string ORDERS_KEY = "orders";
+    private const string PRODUCTS_KEY = "products"; // Added to fetch product details
 
     public GetUserOrdersHandler(DaprClient daprClient)
     {
@@ -26,6 +27,12 @@ public class GetUserOrdersHandler : IRequestHandler<GetUserOrdersQuery, PagedMod
             ORDERS_KEY,
             cancellationToken: cancellationToken
         ) ?? new List<Order>();
+        
+        var allProducts = await _daprClient.GetStateAsync<List<Product>>(
+            STORE_NAME,
+            PRODUCTS_KEY,
+            cancellationToken: cancellationToken
+        ) ?? new List<Product>();
         
         // Filter orders for the user
         var userOrders = orders
@@ -44,7 +51,7 @@ public class GetUserOrdersHandler : IRequestHandler<GetUserOrdersQuery, PagedMod
         var pagedOrders = userOrders
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
-            .Select(o => new OrderSummaryDto(o))
+            .Select(o => new OrderSummaryDto(o, allProducts)) // Pass allProducts to constructor
             .ToList();
         
         return new PagedModel<OrderSummaryDto>(totalCount, pagedOrders, request.PageIndex, request.PageSize);
