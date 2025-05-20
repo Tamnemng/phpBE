@@ -107,7 +107,7 @@ public class GetProductTemplateQueryHandler : IRequestHandler<GetProductTemplate
                                     .Select(img => new ImageBase64Dto
                                     {
                                         Base64Content = img.Url,
-                                        Priority = img.piority
+                                        Priority = img.Priority
                                     })
                                     .ToList();
                             }

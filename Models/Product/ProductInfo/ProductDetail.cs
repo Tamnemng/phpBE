@@ -2,21 +2,21 @@
 public class Image
 {
     public string Url { get; set; }
-    public int piority { get; set; }
+    public int Priority { get; set; }
     public Image()
     {
         Url = string.Empty;
-        piority = 0;
+        Priority = 0;
     }
 
-    public Image(string url, int piority)
+    public Image(string url, int priority)
     {
         Url = url;
-        this.piority = piority;
+        this.Priority = priority;
     }
     public override string ToString()
     {
-        return $"Url: {Url}, Piority: {piority}";
+        return $"Url: {Url}, Priority: {Priority}";
     }
 }
 // public class ImageContainer
@@ -62,7 +62,7 @@ public class Description
     }
     public override string ToString()
     {
-        return $"Name: {Name}, DescriptionText: {DescriptionText}, Piority: {Priority}";
+        return $"Name: {Name}, DescriptionText: {DescriptionText}, Priority: {Priority}";
     }
 }
 public class ProductDetail

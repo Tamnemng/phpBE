@@ -94,7 +94,7 @@ public class GetProductVariantsHandler : IRequestHandler<GetProductVariantsQuery
             if (product.ProductDetail.Image != null)
             {
                 variantDetail.ImageUrls = product.ProductDetail.Image
-                    .OrderBy(i => i.piority)
+                    .OrderBy(i => i.Priority)
                     .Select(i => i.Url)
                     .ToList();
             }
