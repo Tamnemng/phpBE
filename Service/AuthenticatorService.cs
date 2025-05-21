@@ -27,6 +27,7 @@ namespace Think4.Services
         Task<bool> DeleteUser(string userId);
         Task<(int SuccessCount, List<string> FailedIds)> DeleteUsers(List<string> userIds);
         Task LogoutUser(string userId);
+        Task<User?> UpdateUserAsync(string userId, UserUpdateDto userUpdateDto);
     }
 
     public class AuthService : IAuthService
@@ -253,6 +254,41 @@ namespace Think4.Services
             await _daprClient.SaveStateAsync(STORE_NAME, USERS_KEY, users);
 
             return (successCount, failedIds);
+        }
+        public async Task<User?> UpdateUserAsync(string userId, UserUpdateDto userUpdateDto)
+        {
+            var users = await GetAllUsers();
+            var userToUpdate = users.FirstOrDefault(u => u.Id == userId);
+
+            if (userToUpdate == null)
+            {
+                return null; // Or throw NotFoundException
+            }
+
+            if (!string.IsNullOrWhiteSpace(userUpdateDto.Email))
+            {
+                // Optional: Check if email is already taken by another user
+                if (users.Any(u => u.Email.Equals(userUpdateDto.Email, StringComparison.OrdinalIgnoreCase) && u.Id != userId))
+                {
+                    throw new InvalidOperationException($"Email '{userUpdateDto.Email}' is already taken.");
+                }
+                userToUpdate.Email = userUpdateDto.Email;
+            }
+
+            if (!string.IsNullOrWhiteSpace(userUpdateDto.FullName))
+            {
+                userToUpdate.FullName = userUpdateDto.FullName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(userUpdateDto.Password))
+            {
+                userToUpdate.Password = HashPassword(userUpdateDto.Password); // Ensure to hash the new password
+            }
+            
+            userToUpdate.Update(userToUpdate.Username); // Update the UpdatedDate and UpdatedBy fields
+
+            await SaveUser(userToUpdate);
+            return userToUpdate;
         }
     }
 }
