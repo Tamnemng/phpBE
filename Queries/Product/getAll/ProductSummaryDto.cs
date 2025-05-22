@@ -1,3 +1,5 @@
+using System;
+
 public class ProductSummaryDto
 {
     public string Id { get; set; }
@@ -8,6 +10,7 @@ public class ProductSummaryDto
     public decimal CurrentPrice { get; set; }
     public decimal OriginalPrice { get; set; }
     public string ShortDescription { get; set; }
+    public decimal DiscountPercentage { get; set; }
 
     public ProductSummaryDto()
     {
@@ -17,6 +20,7 @@ public class ProductSummaryDto
         ImageUrl = string.Empty;
         BrandName = string.Empty;
         ShortDescription = string.Empty;
+        DiscountPercentage = 0;
     }
 
     public ProductSummaryDto(Product product, string brandName)
@@ -29,5 +33,10 @@ public class ProductSummaryDto
         CurrentPrice = product.Price.CurrentPrice;
         OriginalPrice = product.Price.OriginalPrice;
         ShortDescription = product.ProductDetail.ShortDescription;
+        
+        // Calculate discount percentage
+        DiscountPercentage = OriginalPrice > 0 && OriginalPrice > CurrentPrice
+            ? Math.Round((1 - (CurrentPrice / OriginalPrice)) * 100, 2)
+            : 0;
     }
 }

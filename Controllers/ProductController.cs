@@ -139,7 +139,15 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProducts([FromQuery] string? productName = null, [FromQuery] string? brandCode = null, [FromQuery] string? categoryCode = null, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllProducts([FromQuery] string? productName = null, 
+                                                   [FromQuery] string? brandCode = null, 
+                                                   [FromQuery] string? categoryCode = null, 
+                                                   [FromQuery] decimal? minPrice = null, 
+                                                   [FromQuery] decimal? maxPrice = null,
+                                                   [FromQuery] decimal? minDiscountPercentage = null,
+                                                   [FromQuery] ProductSortOption sortBy = ProductSortOption.None,
+                                                   [FromQuery] int pageIndex = 0, 
+                                                   [FromQuery] int pageSize = 10)
     {
         try
         {
@@ -147,6 +155,10 @@ public class ProductController : ControllerBase
                 productName,
                 brandCode,
                 categoryCode,
+                minPrice,
+                maxPrice,
+                minDiscountPercentage,
+                sortBy,
                 pageIndex,
                 pageSize);
             var pagedProducts = await _mediator.Send(query);

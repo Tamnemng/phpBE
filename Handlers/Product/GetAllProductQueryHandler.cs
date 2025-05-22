@@ -66,6 +66,17 @@ public class GetAllProductsQueryHandler : IRequestHandler<GetAllProductsQuery, P
                 p.ProductInfo.Category.Contains(request.CategoryCode));
         }
         
+        // Apply price range filter
+        if (request.MinPrice.HasValue)
+        {
+            filteredProducts = filteredProducts.Where(p => p.Price.CurrentPrice >= request.MinPrice.Value);
+        }
+        
+        if (request.MaxPrice.HasValue)
+        {
+            filteredProducts = filteredProducts.Where(p => p.Price.CurrentPrice <= request.MaxPrice.Value);
+        }
+        
         var filteredProductsList = filteredProducts.ToList();
         var productSummaries = filteredProductsList.Select(p => 
         {
@@ -77,6 +88,47 @@ public class GetAllProductsQueryHandler : IRequestHandler<GetAllProductsQuery, P
 
             return new ProductSummaryDto(p, brandName);
         }).ToList();
+        
+        // Apply discount percentage filter
+        if (request.MinDiscountPercentage.HasValue)
+        {
+            productSummaries = productSummaries
+                .Where(p => p.DiscountPercentage >= request.MinDiscountPercentage.Value)
+                .ToList();
+        }
+        
+        // Apply sorting
+        switch (request.SortBy)
+        {
+            case ProductSortOption.PriceAscending:
+                productSummaries = productSummaries.OrderBy(p => p.CurrentPrice).ToList();
+                break;
+                
+            case ProductSortOption.PriceDescending:
+                productSummaries = productSummaries.OrderByDescending(p => p.CurrentPrice).ToList();
+                break;
+                
+            case ProductSortOption.DiscountPercentageAscending:
+                productSummaries = productSummaries.OrderBy(p => p.DiscountPercentage).ToList();
+                break;
+                
+            case ProductSortOption.DiscountPercentageDescending:
+                productSummaries = productSummaries.OrderByDescending(p => p.DiscountPercentage).ToList();
+                break;
+                
+            case ProductSortOption.NameAscending:
+                productSummaries = productSummaries.OrderBy(p => p.Name).ToList();
+                break;
+                
+            case ProductSortOption.NameDescending:
+                productSummaries = productSummaries.OrderByDescending(p => p.Name).ToList();
+                break;
+                
+            case ProductSortOption.None:
+            default:
+                // No sorting applied
+                break;
+        }
 
         var totalCount = productSummaries.Count;
         if (totalCount == 0)
