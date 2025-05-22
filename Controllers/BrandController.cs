@@ -161,4 +161,36 @@ public class BrandController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError(ex.Message, HttpStatusCode.InternalServerError, "SERVER_ERROR"));
         }
     }
+
+    [HttpGet("by-category/{categoryCode}")]
+    public async Task<IActionResult> GetBrandsByCategory(string categoryCode)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(categoryCode))
+            {
+                return BadRequest(ApiResponse<object>.CreateError(
+                    "Category code is required",
+                    HttpStatusCode.BadRequest,
+                    "VALIDATION_ERROR"
+                ));
+            }
+
+            var query = new GetBrandsByCategoryQuery(categoryCode);
+            var brands = await _mediator.Send(query);
+            
+            return Ok(ApiResponse<List<BrandNameCodeDto>>.CreateSuccess(
+                brands, 
+                $"Retrieved brands for category '{categoryCode}' successfully!"
+            ));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.CreateError(
+                ex.Message, 
+                HttpStatusCode.InternalServerError, 
+                "SERVER_ERROR"
+            ));
+        }
+    }
 }
