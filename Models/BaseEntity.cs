@@ -7,19 +7,17 @@ public abstract class BaseEntity
 
     public BaseEntity()
     {
-        CreatedDate = DateTime.Today;
+        CreatedDate = DateTime.Now;
         CreatedBy = string.Empty;
     }
 
     public BaseEntity(string createdBy)
     {
-        CreatedDate = DateTime.Today;
+        CreatedDate = DateTime.Now;
         CreatedBy = createdBy;
-    }
-
-    public virtual void Update(string updatedBy)
+    }    public virtual void Update(string updatedBy)
     {
-        UpdatedDate = DateTime.Today;
+        UpdatedDate = DateTime.Now;
         UpdatedBy = updatedBy;
     }
 }
