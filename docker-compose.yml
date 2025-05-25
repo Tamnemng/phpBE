@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   phpbe-app:
     build:
@@ -42,7 +44,7 @@ services:
     container_name: dapr_redis_for_phpbe_with_pass
     ports:
       - "6380:6379"
-   command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD} 
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
