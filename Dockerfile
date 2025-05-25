@@ -25,4 +25,4 @@ EXPOSE 5000
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://*:5000
 
-ENTRYPOINT ["dotnet", "Think4.dll"
+ENTRYPOINT ["dotnet", "Think4.dll"]
