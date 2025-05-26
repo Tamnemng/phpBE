@@ -2,9 +2,9 @@ version: "3.8"
 
 services:
   phpbe-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     image: phpbe
     container_name: phpbe_app_service
     ports:
@@ -38,6 +38,19 @@ services:
       - redis
     network_mode: "service:phpbe-app"
     restart: unless-stopped
+
+  fephp-app:
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
+    image: fephp
+    container_name: fephp_app_service
+    ports:
+      - "80:80"
+    depends_on:
+      - phpbe-app
+    networks:
+      - dapr-network
 
   redis:
     image: "redis:alpine"
