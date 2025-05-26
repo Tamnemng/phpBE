@@ -33,4 +33,4 @@ If you encounter issues, try clearing dependencies and reinstalling:
 rm -rf node_modules && yarn install
 ```
 
-From Thịnh With love🚀🔥
+From Thịnh With lò Vé🚀🔥
