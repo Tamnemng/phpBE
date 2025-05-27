@@ -69,7 +69,7 @@ namespace Think4.Tests
         {
             // Arrange
             var loginDto = new UserLoginDto { Username = "testuser", Password = "wrong" };
-            _mockAuthService.Setup(s => s.Authenticate(loginDto.Username, loginDto.Password)).ReturnsAsync((User)null);
+            _mockAuthService.Setup(s => s.Authenticate(loginDto.Username, loginDto.Password)).ReturnsAsync((User)null!);
 
             // Act
             var result = await _controller.Login(loginDto);

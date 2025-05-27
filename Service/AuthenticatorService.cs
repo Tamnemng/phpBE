@@ -16,11 +16,11 @@ namespace Think4.Services
 {
     public interface IAuthService
     {
-        Task<User> Authenticate(string username, string password);
+        Task<User?> Authenticate(string username, string password);
         Task<User> Register(UserRegisterDto userDto);
         Task<User> RegisterManager(ManagerRegisterDto managerDto);
-        Task<User> GetUserById(string id);
-        Task<User> GetUserByUsername(string username);
+        Task<User?> GetUserById(string id);
+        Task<User?> GetUserByUsername(string username);
         Task UpdateUserLastActive(string userId);
         string GenerateJwtToken(User user);
         Task<bool> IsSessionActive(string userId);
@@ -44,7 +44,7 @@ namespace Think4.Services
             _daprClient = daprClient;
         }
 
-        public async Task<User> Authenticate(string username, string password)
+        public async Task<User?> Authenticate(string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 return null;
@@ -109,13 +109,13 @@ namespace Think4.Services
             return user;
         }
 
-        public async Task<User> GetUserById(string id)
+        public async Task<User?> GetUserById(string id)
         {
             var users = await GetAllUsers();
             return users.FirstOrDefault(u => u.Id == id);
         }
 
-        public async Task<User> GetUserByUsername(string username)
+        public async Task<User?> GetUserByUsername(string username)
         {
             var users = await GetAllUsers();
             return users.FirstOrDefault(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));

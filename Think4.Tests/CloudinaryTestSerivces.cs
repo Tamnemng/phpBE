@@ -42,7 +42,8 @@ public class CloudinaryServiceTests
     public async Task UploadImageBase64Async_NullOrEmptyString_ThrowsArgumentException()
     {
         // Act & Assert
-        var exceptionNull = await Assert.ThrowsAsync<ArgumentException>(() => _cloudinaryService.UploadImageBase64Async(null));
+        // In CloudinaryTestSerivces.cs
+        var exceptionNull = await Assert.ThrowsAsync<ArgumentException>(() => _cloudinaryService.UploadImageBase64Async(null!));
         Assert.Equal("No base64 string was provided", exceptionNull.Message); //
 
         var exceptionEmpty = await Assert.ThrowsAsync<ArgumentException>(() => _cloudinaryService.UploadImageBase64Async(string.Empty));
@@ -103,7 +104,7 @@ public class CloudinaryServiceTests
         // Hoặc, nếu bạn có cấu hình Cloudinary "dummy" hoạt động được, bạn có thể thay đổi assert.
     }
 
-     [Fact]
+    [Fact]
     public async Task UploadImageBase64Async_ValidBase64WithDataUrlPrefix_ProcessesCorrectly()
     {
         // Arrange

@@ -98,7 +98,7 @@ public class BrandControllerTests
         {
             Code = "BRAND002",
             Name = "Test Brand No Image",
-            ImageBase64 = null
+            ImageBase64 = null!
         };
          var username = "testadmin";
 
@@ -395,7 +395,7 @@ public class BrandControllerTests
     {
         // Arrange
         var categoryCode = "CAT001";
-        var expectedBrands = new List<BrandNameCodeDto> { new BrandNameCodeDto("B001", "Brand For Cat001", null) };
+        var expectedBrands = new List<BrandNameCodeDto> { new BrandNameCodeDto("B001", "Brand For Cat001", null!) };
         _mockMediator.Setup(m => m.Send(It.Is<GetBrandsByCategoryQuery>(q => q.CategoryCode == categoryCode), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedBrands);
 
