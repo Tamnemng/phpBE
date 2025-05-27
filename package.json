@@ -2,6 +2,6 @@
     "scripts": {
         "start": "dapr run --app-id myapp --dapr-http-port 3500 --components-path ./components/local -- dotnet run",
         "start:stage": "dapr run --app-id myapp --dapr-http-port 3500 --components-path ./components/stage -- dotnet run",
-        "install": "dotnet add package Dapr.AspNetCore --version 1.14.0 && dotnet add package Dapr.Client --version 1.14.0 && dotnet add package MediatR --version 12.4.1 && dotnet add package MediatR.Extensions.Microsoft.DependencyInjection --version 11.1.0 && dotnet add package Microsoft.AspNetCore.OpenApi --version 8.0.8 && dotnet add package StackExchange.Redis --version 2.8.24 && dotnet add package Swashbuckle.AspNetCore --version 6.4.0 && dotnet add package CloudinaryDotNet --version 1.22.0"
+        "install": "dotnet add package Dapr.AspNetCore --version 1.14.0 && dotnet add package Dapr.Client --version 1.14.0 && dotnet add package MediatR --version 11.0.0 && dotnet add package MediatR.Extensions.Microsoft.DependencyInjection --version 11.0.0 && dotnet add package Microsoft.AspNetCore.OpenApi --version 8.0.8 && dotnet add package StackExchange.Redis --version 2.8.24 && dotnet add package Swashbuckle.AspNetCore --version 6.4.0 && dotnet add package CloudinaryDotNet --version 1.22.0 && dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 8.0.0 && dotnet add package System.IdentityModel.Tokens.Jwt --version 8.0.0"
     }
 }
